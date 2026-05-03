@@ -315,7 +315,12 @@ with st.sidebar:
         st.markdown("### Unlock Job Links")
         code_input = st.text_input("Donation code", type="password", key="unlock_input")
         if code_input:
-            if USE_SUPABASE:
+            admin_code = st.secrets.get("ADMIN_CODE", os.getenv("ADMIN_CODE", ""))
+            if admin_code and code_input == admin_code:
+                st.session_state.jobs_unlocked = True
+                st.success("Admin access granted!")
+                st.rerun()
+            elif USE_SUPABASE:
                 is_valid = verify_unlock_code(code_input)
                 if is_valid:
                     mark_code_used(code_input)
