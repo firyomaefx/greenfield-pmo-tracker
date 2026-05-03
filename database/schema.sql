@@ -151,8 +151,12 @@ CREATE TRIGGER trg_milestones_updated
   BEFORE UPDATE ON milestones
   FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
+-- Add missing columns to existing jobs table (v1.0.2 fix)
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Uncategorized';
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS last_verified TIMESTAMPTZ DEFAULT NOW();
+
 -- ============================================================
--- Public RPC Functions (v1.0.1)
+-- Public RPC Functions (v1.0.2)
 -- SECURITY DEFINER bypasses RLS for anon access via rpc()
 -- ============================================================
 

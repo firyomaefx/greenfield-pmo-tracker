@@ -242,9 +242,9 @@ def verify_unlock_code(code: str) -> bool:
     return len(rows) > 0 and rows[0].get("is_valid", False)
 
 def mark_code_used(code: str) -> bool:
-    """v1.0.1: Mark via SECURITY DEFINER RPC (no service key needed)."""
-    rows = _rpc("consume_donation_code", {"code_input": code.upper().strip()})
-    return len(rows) > 0 and rows[0].get("consume_donation_code", False)
+    """v1.0.2: Mark via SECURITY DEFINER RPC (no service key needed)."""
+    result = _rpc("consume_donation_code", {"code_input": code.upper().strip()})
+    return bool(result)
 
 def get_unlock_code_by_email(email: str):
     """Find unlock codes by donor email."""

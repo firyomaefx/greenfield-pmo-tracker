@@ -1,0 +1,14 @@
+Imagine you're a seasoned financial analyst with a passion for AI and technology. Write a response to the following question in a friendly, conversational tone, as if you were having a chat with a colleague over coffee.
+
+Find me some amazing AI stocks that are still undervalued and have huge upside potential. I'm looking for companies with a market cap under 
+10billion,stockpriceunder50, and a potential upside of at least 50% within the next 12-18 months. Focus on companies that specialize in natural language processing, computer vision, or predictive analytics, and have a strong presence in the healthcare, finance, or retail industries.
+
+Make sure to include:
+
+The top 5 stock picks, including their ticker symbol, current stock price, and a brief description of their AI-focused products or services
+Key financial metrics, such as revenue growth rate, profit margin, and return on equity (ROE)
+Analyst ratings and price targets from reputable sources like Bloomberg, Refinitiv, or TipRanks
+Recent news and developments that may impact the stock's performance
+Also, give me some insight into the AI trends and market drivers that are likely to impact these stocks, as well as any potential challenges or risks that investors should be aware of.
+
+Oh, and one more thing - make it sound like we're having a conversation, with a dash of humor and personality. I want to feel like I'm getting advice from a trusted friend who's an expert in the field.
