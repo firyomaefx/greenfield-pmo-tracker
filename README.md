@@ -13,7 +13,7 @@
 | Deployment | URL |
 |------------|-----|
 | **Streamlit Cloud** | [greenfield-pmo-tracker.streamlit.app](https://greenfield-pmo-tracker.streamlit.app) |
-| **Supabase DB** | [qoncvdcyypwhogrqzesm.supabase.co](https://qoncvdcyypwhogrqzesm.supabase.co) |
+| **Supabase DB** | [configured via secrets] |
 | **Ko-fi Donation** | [ko-fi.com/greenfieldtrackerbypedot](https://ko-fi.com/greenfieldtrackerbypedot) |
 
 ---

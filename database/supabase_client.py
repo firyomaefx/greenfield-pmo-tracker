@@ -13,8 +13,8 @@ from datetime import datetime
 
 load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://qoncvdcyypwhogrqzesm.supabase.co")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "sb_publishable_omF5no32CBvoK2nBqgjCRg_3VlDj4lp")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
 # Client instances
