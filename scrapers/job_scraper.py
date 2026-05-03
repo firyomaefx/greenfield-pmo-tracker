@@ -1,11 +1,14 @@
-"""Job posting scraper for tracked companies in Kulim, Batu Kawan, Bayan Lepas.
+"""Brave Search API job scraper for 20+ tracked factory companies.
 
-Searches publicly visible job portal pages for companies we track.
-LinkedIn scraping is blocked by ToS; we use Google job snippets and 
-publicly accessible career pages instead.
+Searches Kulim, Batu Kawan & Bayan Lepas via Brave Search API.
+API key stored ONLY in GitHub/Streamlit secrets — never in source code.
+Free tier: 2,000 queries/month. We use ~12/day = 360/month (safe).
 """
 
-from typing import List, Dict
+import os
+import json
+import re
+from typing import List, Dict, Optional
 import requests as req_lib
 from scrapers.base_scraper import BaseScraper
 
@@ -16,39 +19,98 @@ TRACKED_COMPANIES = [
     "Hyundai", "Unigen", "Pivotal", "Hotayi", "Benchmark", "Chipbond"
 ]
 
-LOCATIONS = ["Kulim", "Batu Kawan", "Bayan Lepas", "Penang"]
+ZONES = ["Kulim", "Batu Kawan", "Bayan Lepas"]
 
-class JobScraper(BaseScraper):
+CATEGORY_RULES = [
+    (r"\b(operator|assembler|production|packer|general worker|production operator|machine operator|qc inspector)\b", "Operator"),
+    (r"\b(technician|technician)\b", "Technician"),
+    (r"\b(engineer|engineering|design engineer|process engineer|qa engineer|r&d)\b", "Engineer"),
+    (r"\b(supervisor|team lead|shift lead|line leader|foreman|foreperson)\b", "Supervisor"),
+    (r"\b(logistics|warehouse|forklift|driver|shipping|receiving|inventory|storekeeper|dispatch)\b", "Logistics"),
+    (r"\b(admin|hr|human resource|receptionist|clerk|office|accountant|finance|payroll)\b", "Admin"),
+    (r"\b(it |software|developer|programmer|network|system admin|sap|erp|data analyst|cyber)\b", "IT"),
+    (r"\b(manager|director|head of|president|vp|senior manager|general manager|plant manager|factory manager)\b", "Management"),
+]
+
+def classify_category(text: str) -> str:
+    """Auto-classify job title/description into a category."""
+    text_lower = text.lower()
+    for pattern, category in CATEGORY_RULES:
+        if re.search(pattern, text_lower):
+            return category
+    return "Uncategorized"
+
+class BraveJobScraper(BaseScraper):
     def __init__(self):
-        super().__init__("Job")
+        super().__init__("BraveJobs", min_delay=1.0, max_delay=2.0)
+        self.api_key = os.getenv("BRAVE_API_KEY", "")
+        self.api_url = "https://api.search.brave.com/res/v1/web/search"
+        self.headers = {
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+            "X-Subscription-Token": self.api_key,
+        }
+
+    def search(self, query: str, count: int = 20) -> List[Dict]:
+        """Call Brave Search API for a single query."""
+        params = {
+            "q": query,
+            "count": count,
+            "search_lang": "en",
+            "freshness": "pw",  # past week only
+        }
+        try:
+            resp = self.session.get(
+                self.api_url, headers=self.headers, params=params, timeout=30
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("web", {}).get("results", [])
+        except Exception as e:
+            print(f"[BraveJobs] API error for '{query[:60]}': {str(e)[:100]}")
+            return []
 
     def scrape(self) -> List[Dict]:
-        """Search Google for publicly indexed job listings."""
+        """Search all 3 zones, match results to tracked companies.
+        Returns a flat list with company/zone/category/title/url/source/detected_by."""
         results = []
-        for company in TRACKED_COMPANIES[:5]:  # Limit to avoid rate-limiting
-            for loc in LOCATIONS[:2]:
-                query = f"{company} jobs {loc}"
-                url = f"https://www.google.com/search?q={requests.utils.quote(query)}&tbm=nws"
-                try:
-                    html = self.fetch(url)
-                    if html:
-                        from bs4 import BeautifulSoup
-                        import requests as req_lib
-                        soup = BeautifulSoup(html, "lxml")
-                        for link in soup.select("a[href]"):
-                            href = link.get("href", "")
-                            if href.startswith("http") and "google" not in href:
-                                results.append({
-                                    "source": "Google Jobs",
-                                    "title": f"{company} - {loc}",
-                                    "body": link.get_text(strip=True),
-                                    "source_url": href,
-                                    "published_at": "",
-                                    "raw_text": f"{company} {loc} job".lower(),
-                                    "detected_by": "jobs"
-                                })
-                                break  # One result per company-location pair
-                except Exception as e:
-                    print(f"[Job] Error for {company} {loc}: {e}")
+
+        for zone in ZONES:
+            query = f"jobs hiring {zone} factory Malaysia"
+            items = self.search(query)
+
+            for item in items:
+                title = item.get("title", "")
+                description = item.get("description", "")
+                url = item.get("url", "")
+                full_text = (title + " " + description).lower()
+
+                matched_company = None
+                for company in TRACKED_COMPANIES:
+                    # Match full company name or key part
+                    company_lower = company.lower()
+                    # Check with flexible matching
+                    parts = company_lower.split()
+                    if company_lower in full_text:
+                        matched_company = company
+                        break
+                    elif len(parts) > 1 and parts[0] in full_text:
+                        matched_company = company
+                        break
+
+                if matched_company:
+                    category = classify_category(title + " " + description)
+                    results.append({
+                        "source": "Brave Search",
+                        "title": title,
+                        "body": description[:500] if description else "",
+                        "source_url": url,
+                        "published_at": "",
+                        "raw_text": full_text,
+                        "detected_by": "brave_jobs",
+                        "company": matched_company,
+                        "zone": zone,
+                        "category": category,
+                    })
 
         return results

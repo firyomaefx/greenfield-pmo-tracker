@@ -11,7 +11,7 @@ from scrapers.rss_scraper import RSSScraper
 from scrapers.mida_scraper import MIDAScraper
 from scrapers.penang_scraper import PenangScraper
 from scrapers.bursa_scraper import BursaScraper
-from scrapers.job_scraper import JobScraper
+from scrapers.job_scraper import BraveJobScraper
 from scrapers.company_scraper import CompanyScraper
 from scrapers.nlp_processor import classify_news_item
 from utils.deduplicator import deduplicate
@@ -25,7 +25,7 @@ SCRAPERS = [
     ("mida", MIDAScraper()),
     ("penang", PenangScraper()),
     ("bursa", BursaScraper()),
-    ("jobs_search", JobScraper()),
+    ("brave_jobs", BraveJobScraper()),
     ("company_pages", CompanyScraper()),
 ]
 
@@ -62,32 +62,53 @@ def process_and_store(items: List[Dict]):
     for item in unique:
         item = classify_news_item(item)
 
-        # Determine company_id
-        extracted_name = item.get("extracted_company", "")
-        company_id = None
-
-        if extracted_name and extracted_name.lower() in existing_companies:
-            company_id = existing_companies[extracted_name.lower()]["id"]
-        elif extracted_name:
-            # New auto-detected company
-            new_comp = upsert_company_by_name({
-                "name": extracted_name,
-                "location": item.get("extracted_location") or "Penang",
-                "sector": "TBD",
-                "status": "Discovered",
-                "phase": "Verification Pending",
-                "is_auto_detected": True,
-                "needs_review": True,
-                "latest_news": item.get("title", "")[:300],
-                "source_url": item.get("source_url", "")
-            })
-            if new_comp:
-                company_id = new_comp["id"]
-                existing_companies[extracted_name.lower()] = new_comp
-                print(f"  [NEW COMPANY] {extracted_name} ({item.get('extracted_location','?')})")
+        # Priority 1: Brave jobs already have pre-matched company + zone
+        if item.get("detected_by") == "brave_jobs" and item.get("company"):
+            matched_name = item["company"]
+            if matched_name.lower() in existing_companies:
+                company_id = existing_companies[matched_name.lower()]["id"]
+            else:
+                # Auto-detect new company
+                new_comp = upsert_company_by_name({
+                    "name": matched_name,
+                    "location": item.get("zone") or "Penang",
+                    "sector": "TBD",
+                    "status": "Discovered",
+                    "phase": "Verification Pending",
+                    "is_auto_detected": True,
+                    "needs_review": True,
+                    "latest_news": item.get("title", "")[:300],
+                    "source_url": item.get("source_url", "")
+                })
+                if new_comp:
+                    company_id = new_comp["id"]
+                    existing_companies[matched_name.lower()] = new_comp
+                    print(f"  [NEW COMPANY via Brave] {matched_name} ({item.get('zone','?')})")
+        else:
+            # For other scrapers, use NLP extraction
+            extracted_name = item.get("extracted_company", "")
+            if extracted_name and extracted_name.lower() in existing_companies:
+                company_id = existing_companies[extracted_name.lower()]["id"]
+            elif extracted_name:
+                new_comp = upsert_company_by_name({
+                    "name": extracted_name,
+                    "location": item.get("extracted_location") or "Penang",
+                    "sector": "TBD",
+                    "status": "Discovered",
+                    "phase": "Verification Pending",
+                    "is_auto_detected": True,
+                    "needs_review": True,
+                    "latest_news": item.get("title", "")[:300],
+                    "source_url": item.get("source_url", "")
+                })
+                if new_comp:
+                    company_id = new_comp["id"]
+                    existing_companies[extracted_name.lower()] = new_comp
+                    print(f"  [NEW COMPANY] {extracted_name} ({item.get('extracted_location','?')})")
 
         if company_id:
-            if item.get("detected_by") in ["rss", "mida", "penang", "bursa", "company_page"]:
+            detected = item.get("detected_by", "")
+            if detected in ["rss", "mida", "penang", "bursa", "company_page"]:
                 result = insert_news_item({
                     "company_id": company_id,
                     "title": item["title"],
@@ -95,21 +116,37 @@ def process_and_store(items: List[Dict]):
                     "source": item["source"],
                     "source_url": item.get("source_url", ""),
                     "published_at": item.get("published_at", ""),
-                    "detected_by": item.get("detected_by", "scraper")
+                    "detected_by": detected
                 })
                 if result:
                     new_news += 1
-            elif item.get("detected_by") == "jobs":
+            elif detected in ["jobs", "brave_jobs"]:
+                job_zone = item.get("zone") or item.get("extracted_location", "")
+                job_category = item.get("category", "Uncategorized")
                 result = insert_job({
                     "company_id": company_id,
                     "title": item["title"],
                     "job_url": item.get("source_url", ""),
                     "source": item["source"],
-                    "location": item.get("extracted_location", ""),
+                    "location": job_zone,
+                    "category": job_category,
                     "posted_at": item.get("published_at", datetime.now().isoformat())
                 })
                 if result:
                     new_jobs += 1
+            else:
+                # Unknown type, store as news
+                result = insert_news_item({
+                    "company_id": company_id,
+                    "title": item["title"],
+                    "body": item.get("body", ""),
+                    "source": item["source"],
+                    "source_url": item.get("source_url", ""),
+                    "published_at": item.get("published_at", ""),
+                    "detected_by": detected
+                })
+                if result:
+                    new_news += 1
 
     print(f"  New news items: {new_news}, New job listings: {new_jobs}")
 

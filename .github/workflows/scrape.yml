@@ -33,10 +33,12 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
         run: |
           cp .env.example .env 2>/dev/null || true
           echo "SUPABASE_URL=${SUPABASE_URL}" >> .env
           echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}" >> .env
+          echo "BRAVE_API_KEY=${BRAVE_API_KEY}" >> .env
           python -m scrapers.run_all
 
       - name: Snapshot database to JSON
