@@ -154,44 +154,44 @@ def deactivate_old_jobs():
     client = get_service_client()
     client.table("jobs").update({"is_active": False}).lt("created_at", "now() - interval '30 days'").eq("is_active", True).execute()
 
-# ==================== JOB ASSISTANT QUERIES (Phase 2) ====================
+# ==================== JOB ASSISTANT QUERIES (Phase 2 + v1.0.1 RPC) ====================
+
+def _rpc(func_name: str, params: dict = None):
+    """Call Supabase RPC function via anon client (SECURITY DEFINER bypasses RLS)."""
+    client = get_anon_client()
+    resp = client.rpc(func_name, params or {}).execute()
+    return resp.data or []
 
 def get_jobs_preview():
-    """Get preview counts by company (no links)."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("id, companies(name, location)").eq("is_active", True).execute()
+    """Get preview counts by company (no links) — v1.0.1: uses RPC."""
+    rows = _rpc("get_public_jobs")
     preview = {}
-    for row in resp.data or []:
-        comp = row.get("companies", {})
-        name = comp.get("name", "Unknown")
+    for row in rows:
+        name = row.get("company_name", "Unknown")
         if name not in preview:
-            preview[name] = {"count": 0, "zone": comp.get("location", "?")}
+            preview[name] = {"count": 0, "zone": row.get("company_location", "?")}
         preview[name]["count"] += 1
     return preview
 
 def get_jobs_by_zone(zone: str):
     """Get all active jobs in a zone with link verification status."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("*, companies!inner(name, location)").eq("companies.location", zone).eq("is_active", True).order("created_at", desc=True).execute()
-    return _enrich_jobs(resp.data or [])
+    rows = _rpc("get_public_jobs", {"zone_filter": zone})
+    return _enrich_jobs(rows)
 
 def get_jobs_by_company(company_name: str):
     """Get all active jobs for a company."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("*, companies!inner(name, location)").eq("companies.name", company_name).eq("is_active", True).order("created_at", desc=True).execute()
-    return _enrich_jobs(resp.data or [])
+    rows = _rpc("get_public_jobs", {"company_name_filter": company_name})
+    return _enrich_jobs(rows)
 
 def get_jobs_by_category(category: str):
     """Get all active jobs in a category across zones."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("*, companies!inner(name, location)").eq("category", category).eq("is_active", True).order("created_at", desc=True).execute()
-    return _enrich_jobs(resp.data or [])
+    rows = _rpc("get_public_jobs", {"category_filter": category})
+    return _enrich_jobs(rows)
 
 def get_jobs_by_zone_and_category(zone: str, category: str):
     """Get active jobs in a zone filtered by category."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("*, companies!inner(name, location)").eq("companies.location", zone).eq("category", category).eq("is_active", True).order("created_at", desc=True).execute()
-    return _enrich_jobs(resp.data or [])
+    rows = _rpc("get_public_jobs", {"zone_filter": zone, "category_filter": category})
+    return _enrich_jobs(rows)
 
 def _enrich_jobs(jobs: list) -> list:
     """Add verification status flag to each job."""
@@ -208,18 +208,12 @@ def _enrich_jobs(jobs: list) -> list:
     return jobs
 
 def get_distinct_categories():
-    """Get list of available categories that have active jobs."""
-    sc = get_service_client()
-    resp = sc.table("jobs").select("category").eq("is_active", True).execute()
-    cats = set()
-    for row in resp.data or []:
-        c = row.get("category", "")
-        if c and c != "Uncategorized":
-            cats.add(c)
-    return sorted(cats)
+    """Get list of available categories that have active jobs — v1.0.1: uses RPC."""
+    rows = _rpc("get_public_categories")
+    return [r["category"] for r in rows if r.get("category")]
 
 def update_job_verification(job_id: str):
-    """Update the last_verified timestamp for a job."""
+    """Update the last_verified timestamp for a job — service role required."""
     sc = get_service_client()
     sc.table("jobs").update({"last_verified": "now()"}).eq("id", job_id).execute()
 
@@ -243,21 +237,14 @@ def create_unlock_code(email: str = "", ko_fi_ref: str = "") -> str:
     return code
 
 def verify_unlock_code(code: str) -> bool:
-    """Verify if unlock code is valid and unused."""
-    client = get_anon_client()
-    # Use anon since RLS will prevent reading, but service bypasses
-    sc = get_service_client()
-    resp = sc.table("donation_codes").select("*").eq("code", code.upper().strip()).eq("is_used", False).execute()
-    return len(resp.data) > 0
+    """v1.0.1: Verify via SECURITY DEFINER RPC (no service key needed)."""
+    rows = _rpc("verify_donation_code", {"code_input": code.upper().strip()})
+    return len(rows) > 0 and rows[0].get("is_valid", False)
 
 def mark_code_used(code: str) -> bool:
-    """Mark an unlock code as used."""
-    sc = get_service_client()
-    sc.table("donation_codes").update({
-        "is_used": True,
-        "used_at": datetime.utcnow().isoformat()
-    }).eq("code", code.upper().strip()).eq("is_used", False).execute()
-    return True
+    """v1.0.1: Mark via SECURITY DEFINER RPC (no service key needed)."""
+    rows = _rpc("consume_donation_code", {"code_input": code.upper().strip()})
+    return len(rows) > 0 and rows[0].get("consume_donation_code", False)
 
 def get_unlock_code_by_email(email: str):
     """Find unlock codes by donor email."""

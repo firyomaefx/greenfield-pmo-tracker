@@ -150,3 +150,78 @@ DROP TRIGGER IF EXISTS trg_milestones_updated ON milestones;
 CREATE TRIGGER trg_milestones_updated
   BEFORE UPDATE ON milestones
   FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+-- ============================================================
+-- Public RPC Functions (v1.0.1)
+-- SECURITY DEFINER bypasses RLS for anon access via rpc()
+-- ============================================================
+
+-- 1. Verify donation unlock code without service key
+CREATE OR REPLACE FUNCTION verify_donation_code(code_input TEXT)
+RETURNS TABLE(code TEXT, is_valid BOOLEAN, email TEXT)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT dc.code, NOT COALESCE(dc.is_used, false) AS is_valid, dc.email
+  FROM donation_codes dc
+  WHERE dc.code = UPPER(TRIM(code_input));
+END;
+$$;
+GRANT EXECUTE ON FUNCTION verify_donation_code TO anon, authenticated;
+
+-- 2. Mark unlock code as consumed
+CREATE OR REPLACE FUNCTION consume_donation_code(code_input TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  UPDATE donation_codes SET is_used = true, used_at = NOW()
+  WHERE code = UPPER(TRIM(code_input)) AND is_used = false;
+  RETURN FOUND;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION consume_donation_code TO anon, authenticated;
+
+-- 3. Public job listing access (bypasses jobs RLS)
+CREATE OR REPLACE FUNCTION get_public_jobs(
+  zone_filter TEXT DEFAULT NULL,
+  category_filter TEXT DEFAULT NULL,
+  company_name_filter TEXT DEFAULT NULL
+)
+RETURNS TABLE(
+  id UUID, company_name TEXT, company_location TEXT,
+  title TEXT, job_url TEXT, source TEXT,
+  location TEXT, category TEXT, posted_at TEXT,
+  last_verified TIMESTAMPTZ, is_active BOOLEAN, created_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT j.id, c.name, c.location,
+    j.title, j.job_url, j.source, j.location, j.category,
+    j.posted_at, j.last_verified, j.is_active, j.created_at
+  FROM jobs j JOIN companies c ON j.company_id = c.id
+  WHERE j.is_active = true
+    AND (zone_filter IS NULL OR c.location = zone_filter)
+    AND (category_filter IS NULL OR j.category = category_filter)
+    AND (company_name_filter IS NULL OR c.name = company_name_filter)
+  ORDER BY j.created_at DESC;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION get_public_jobs TO anon, authenticated;
+
+-- 4. Distinct active categories (bypasses jobs RLS)
+CREATE OR REPLACE FUNCTION get_public_categories()
+RETURNS TABLE(category TEXT)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT j.category FROM jobs j
+  WHERE j.is_active = true AND j.category != 'Uncategorized'
+  ORDER BY j.category;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION get_public_categories TO anon, authenticated;
