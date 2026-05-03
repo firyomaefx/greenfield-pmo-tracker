@@ -1,0 +1,64 @@
+# GREENFIELD DASHBOARD - HOW TO OPEN
+
+## PROBLEM: Double-click does nothing?
+
+Windows might not know how to open .html files. Here's how to fix it:
+
+## METHOD 1: Double-click the NEW batch file (RECOMMENDED)
+1. Find the file named **OPEN_DASHBOARD.bat** in your Documents folder
+2. **Double-click it**
+3. It will automatically open in your browser
+
+---
+
+## METHOD 2: Right-click > Open With Browser
+If Method 1 doesn't work, do this:
+
+1. Find **dashboard.html** in Documents
+2. **Right-click** on it
+3. Select **"Open with"**
+4. Choose one of these:
+   - Microsoft Edge
+   - Google Chrome
+   - Any web browser you have
+
+---
+
+## METHOD 3: Copy-Paste into Browser
+1. Open your web browser (Chrome, Edge, Firefox)
+2. Press **Ctrl+O** (or go to File > Open)
+3. Navigate to: `C:\Users\Pedot\OneDrive\Documents\`
+4. Select **dashboard.html**
+5. Click Open
+
+---
+
+## METHOD 4: Drag and Drop
+1. Open your web browser
+2. Open File Explorer to your Documents folder
+3. **Drag** dashboard.html file into the browser window
+
+---
+
+## STILL NOT WORKING?
+
+Your Windows might have a security setting blocking .html files. Try this:
+
+1. Open **Microsoft Edge** browser
+2. In the address bar, type this EXACTLY:
+   ```
+   file:///C:/Users/Pedot/OneDrive/Documents/dashboard.html
+   ```
+3. Press Enter
+
+---
+
+## NEED HELP?
+
+The dashboard is saved at this location:
+`C:\Users\Pedot\OneDrive\Documents\dashboard.html`
+
+If all else fails, open Chrome or Edge and copy-paste this URL:
+```
+file:///C:/Users/Pedot/OneDrive/Documents/dashboard.html
+```

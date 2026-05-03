@@ -1,0 +1,81 @@
+name: Release Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v1.0.0)'
+        required: true
+        type: string
+      description:
+        description: 'Release notes (markdown)'
+        required: false
+        type: string
+        default: 'Regular update - see commit history for details'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update VERSION file
+        run: echo "${{ github.event.inputs.version }}" > VERSION
+
+      - name: Commit version bump
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Release ${{ github.event.inputs.version }}"
+          file_pattern: VERSION
+          skip_dirty_check: true
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | head -1)
+          if [ -z "$PREV_TAG" ]; then
+            echo "## Initial Release" > CHANGELOG.md
+          else
+            echo "## Changes since $PREV_TAG" > CHANGELOG.md
+            git log $PREV_TAG..HEAD --oneline --no-merges >> CHANGELOG.md
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Git Tag
+        run: |
+          git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git push origin ${{ github.event.inputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.version }}
+          body: |
+            ## Greenfield Factory Tracker — ${{ github.event.inputs.version }}
+            
+            ${{ github.event.inputs.description }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### Deployments
+            - 🟢 Supabase DB: https://qoncvdcyypwhogrqzesm.supabase.co
+            - 🟢 Streamlit Cloud: https://greenfield-pmo-tracker.streamlit.app
+            - 🟢 Ko-fi: https://ko-fi.com/greenfieldtrackerbypedot
+            
+            ### Tracked Projects
+            | Location | Companies |
+            |----------|-----------|
+            | Kulim | Novolyte, AIXTRON, Medtronic, Ferrotec, Ichia, AT&S, Hyundai, Unigen, Pivotal |
+            | Batu Kawan | UMediC, Hotayi, Benchmark, Chipbond |
+            | Bayan Lepas | AMD, MPS, Bitdeer, congatec, V-Chip, Hanic, Penang ATE Campus |
+          draft: false
+          prerelease: false
+          generate_release_notes: true

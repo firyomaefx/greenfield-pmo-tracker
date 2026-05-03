@@ -1,0 +1,45 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+*.png
+*.mp4
+*.zip
+*.url
+.tmp.drivedownload/
+3DMark/
+Custom Office Templates/
+FeedbackHub/
+FrameView/
+IV/
+Kuliah_map/
+MT5 Trading/
+New folder/
+New project/
+Northern-Frontier-Tracker/
+Nurshafiana/
+Nurshafiana/
+Office Lens/
+Python Scripts/
+Rainmeter/
+Rithmic/
+SSM Tengkolok Empire/
+solvy/
+Sound Recordings/
+TTRG AI Powered Agency V4Jan25/
+waboost/
+WindowsPowerShell/
+Wondershare/
+Wondershare Filmora 9/
+Zoom/
+add_bayan.py
+fix_bayan.py
+*.rdp
+desktop.ini
+*.ps1
+projects_data.json
+*.db

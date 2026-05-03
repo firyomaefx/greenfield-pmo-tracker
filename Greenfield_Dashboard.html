@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenfield Factory Tracker | Kulim, Batu Kawan & Bayan Lepas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f6f7;
+  color: #1a1a1a;
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
+}
+
+header {
+  background: linear-gradient(135deg, #0a1a11 0%, #122b1e 50%, #1b3b2b 100%);
+  color: #e0e5e1;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  position: relative;
+  overflow: hidden;
+}
+
+header::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.4rem;
+}
+
+header p {
+  font-size: 0.95rem;
+  font-weight: 400;
+  opacity: 0.85;
+  letter-spacing: -0.01em;
+}
+
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* Print */
+.print-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #0d2b1d;
+  border: 1px solid rgba(26,92,50,0.2);
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: -0.01em;
+  box-shadow: 0 2px 12px rgba(13,43,29,0.08);
+  transition: all 0.2s;
+}
+
+.print-btn:hover {
+  background: #0d2b1d;
+  color: white;
+  border-color: #0d2b1d;
+}
+
+/* KPI */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-box {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(26,92,50,0.12);
+  border-radius: 18px;
+  padding: 1.4rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 24px rgba(13,43,29,0.06);
+  text-align: center;
+}
+
+.kpi-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(13,43,29,0.12);
+  border-color: rgba(26,92,50,0.25);
+}
+
+.kpi-box h3 {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #0d2b1d;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+
+.kpi-box p {
+  color: #86868b;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Controls */
+.controls {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(26,92,50,0.1);
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(13,43,29,0.04);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.controls label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #86868b;
+  margin-bottom: 0.3rem;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.controls select {
+  padding: 0.5rem 1rem;
+  border: 1.5px solid rgba(26,92,50,0.15);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  background: white;
+  font-family: inherit;
+  transition: border 0.2s;
+}
+
+.controls select:focus {
+  outline: none;
+  border-color: #1a8a4a;
+}
+
+/* Project Cards */
+.project-card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(26,92,50,0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(13,43,29,0.05);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+
+.project-card:hover {
+  box-shadow: 0 8px 32px rgba(13,43,29,0.1);
+  transform: translateY(-2px);
+}
+
+.project-header {
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(26,92,50,0.08);
+}
+
+.project-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0d2b1d;
+  letter-spacing: -0.03em;
+}
+
+.location-badge {
+  padding: 0.25rem 1rem;
+  border-radius: 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.location-kulim {
+  background: #1b3b2b;
+  color: #c8d8ce;
+}
+
+.location-batu {
+  background: #162544;
+  color: #c0cee4;
+}
+
+.location-bayan {
+  background: #3d2a15;
+  color: #ebd8c0;
+}
+
+.project-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #f0f1f2;
+}
+
+.meta-item { text-align: center; }
+
+.meta-item .label {
+  font-size: 0.7rem;
+  color: #787880;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.meta-item .value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.project-latest {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(90deg, rgba(18,43,30,0.05), transparent);
+  border-left: 3px solid #1b3b2b;
+  margin: 0 1.5rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.88rem;
+  color: #333;
+}
+
+/* Tables */
+.milestone-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.milestone-table th {
+  background: #1a1a1a;
+  color: #f0f0f0;
+  padding: 0.8rem;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.milestone-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 0.82rem;
+}
+
+.status-completed { color: #1b5e2e; font-weight: 600; }
+.status-planned { color: #8a5a00; font-weight: 600; }
+.status-delayed { color: #8a1a1a; font-weight: 600; }
+.status-in-progress { color: #1a3a7a; font-weight: 600; }
+
+/* Risk */
+.risk-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.risk-table th {
+  background: #2a1010;
+  color: #f0c8c8;
+  padding: 0.8rem;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.risk-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 0.82rem;
+}
+
+/* Actions */
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+  transition: all 0.15s;
+}
+
+.action-item:hover {
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.action-item.completed label {
+  text-decoration: line-through;
+  color: #86868b;
+}
+
+.action-item input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  cursor: pointer;
+  accent-color: #1a1a1a;
+  flex-shrink: 0;
+}
+
+/* Donation */
+.donation-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0a1a11, #122b1e, #1b3b2b);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  color: #e0e5e1;
+  text-align: center;
+}
+
+.donation-section h2 {
+  color: #e0e5e1;
+  border-bottom: none;
+  margin-top: 0;
+}
+
+.donation-section p { color: #c0c8c3; }
+
+.donation-section a {
+  background: white;
+  color: #1a1a1a;
+  padding: 14px 32px;
+  border-radius: 28px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-block;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.donation-section a:hover {
+  background: #e0e0e0;
+  transform: scale(1.03);
+}
+
+/* Config button */
+.config-btn {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  transition: all 0.2s;
+}
+
+.config-btn:hover {
+  background: #333333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: #787880;
+  font-size: 0.8rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+h2 {
+  color: #111111;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1b3b2b;
+}
+
+@media print {
+  .print-btn, .config-btn { display: none; }
+  body { background: white; }
+  .kpi-box, .project-card, .controls, .action-item { box-shadow: none; backdrop-filter: none; }
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #0d0d0d; color: #cccccc; }
+  header { background: linear-gradient(135deg, #050a08, #0a1510, #111c15); }
+  .kpi-box { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+  .kpi-box h3 { color: #e0e0e0; }
+  .kpi-box p { color: #888888; }
+  .project-card { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+  .project-title { color: #e0e0e0; }
+  .project-latest { background: rgba(255,255,255,0.03); border-left-color: #333; }
+  .controls { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+  .action-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+  h2 { color: #e0e0e0; border-bottom-color: #333; }
+  .milestone-table th { background: #111; }
+  .milestone-table td { border-bottom-color: rgba(255,255,255,0.04); }
+  .risk-table th { background: #1a0a0a; }
+  .risk-table td { border-bottom-color: rgba(255,255,255,0.04); }
+  .meta-item .value { color: #cccccc; }
+  footer { color: #666666; border-top-color: rgba(255,255,255,0.06); }
+}
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+
+<header>
+  <h1>Greenfield Factory Project Tracker</h1>
+  <p>PMO Portfolio Tracker — Kulim, Batu Kawan &amp; Bayan Lepas (2025–2028)</p>
+</header>
+
+<div class="container">
+
+  <div class="kpi-row">
+    <div class="kpi-box"><h3 id="kpi-total">20</h3><p>Active Projects</p></div>
+    <div class="kpi-box"><h3 id="kpi-kulim">9</h3><p>Kulim Sites</p></div>
+    <div class="kpi-box"><h3 id="kpi-batu">4</h3><p>Batu Kawan Sites</p></div>
+    <div class="kpi-box"><h3 id="kpi-bayan">7</h3><p>Bayan Lepas Sites</p></div>
+  </div>
+
+  <div class="controls">
+    <div>
+      <label>Location</label>
+      <select id="loc-filter" multiple size="3">
+        <option value="Kulim" selected>Kulim</option>
+        <option value="Batu Kawan" selected>Batu Kawan</option>
+        <option value="Bayan Lepas" selected>Bayan Lepas</option>
+      </select>
+    </div>
+    <div>
+      <label>Company</label>
+      <select id="comp-filter" multiple size="6">
+        <option value="Novolyte" selected>Novolyte</option>
+        <option value="AIXTRON" selected>AIXTRON</option>
+        <option value="UMediC Group Berhad" selected>UMediC</option>
+        <option value="Medtronic" selected>Medtronic</option>
+        <option value="AMD" selected>AMD</option>
+        <option value="Monolithic Power Systems" selected>MPS</option>
+        <option value="Bitdeer Technologies" selected>Bitdeer</option>
+        <option value="congatec" selected>congatec</option>
+        <option value="V-Chip" selected>V-Chip</option>
+        <option value="Hanic" selected>Hanic</option>
+        <option value="Penang ATE Campus" selected>ATE Campus</option>
+        <option value="Ferrotec" selected>Ferrotec</option>
+        <option value="Ichia Technologies" selected>Ichia</option>
+        <option value="AT&S" selected>AT&S</option>
+        <option value="Hyundai Motor" selected>Hyundai</option>
+        <option value="Unigen" selected>Unigen</option>
+        <option value="Pivotal Systems" selected>Pivotal</option>
+        <option value="Hotayi Electronic" selected>Hotayi</option>
+        <option value="Benchmark Precision" selected>Benchmark</option>
+        <option value="Chipbond Technology" selected>Chipbond</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="projects-container"></div>
+
+  <h2>Latest Updates</h2>
+  <div id="news-container"></div>
+
+  <h2>Risk Register</h2>
+  <div style="overflow-x:auto;">
+    <table class="risk-table">
+      <thead><tr><th>Risk ID</th><th>Description</th><th>Impact</th><th>Mitigation</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>R001</td><td>Supply chain delays</td><td>High</td><td>Dual sourcing strategy</td><td>Project Lead</td></tr>
+        <tr><td>R002</td><td>Regulatory changes</td><td>Medium</td><td>Government liaison</td><td>Compliance Officer</td></tr>
+        <tr><td>R003</td><td>Labor shortage</td><td>High</td><td>Local training programs</td><td>HR Manager</td></tr>
+        <tr><td>R004</td><td>Funding/CAPEX fluctuation</td><td>High</td><td>Phased investment approach</td><td>Finance Controller</td></tr>
+        <tr><td>R005</td><td>Concurrent site works (KHTP/BKIP)</td><td>High</td><td>Traffic & logistics coordination</td><td>PMO Lead</td></tr>
+        <tr><td>R006</td><td>Currency/EUR-RM volatility</td><td>Medium</td><td>FX hedging</td><td>Finance Controller</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Action Items</h2>
+  <div id="action-container"></div>
+
+  <div class="donation-section">
+    <h2>Support This Tracker</h2>
+    <p style="margin-bottom:1.2rem;">Your donation unlocks live job listings from all 20+ tracked factories</p>
+    <a href="https://ko-fi.com/greenfieldtrackerbypedot" target="_blank">Donate on Ko-fi</a>
+  </div>
+
+  <footer>
+    <p>Greenfield PMO Tracker v1.0.0 | Amazing Green Theme | Kulim • Batu Kawan • Bayan Lepas | 2026</p>
+    <p>Double-click this HTML file anytime to open. No installation required.</p>
+  </footer>
+
+</div>
+
+<script>
+const PROJECTS=[
+  {company:"Novolyte",loc:"Kulim",sector:"Battery Electrolytes",status:"Under Construction",phase:"Construction",invest:"RM 264M",jobs:300,news:"Jan 2026: Groundbreaking for RM264M electrolyte plant at KHTP. Capacity ~30,000 MT/year. Commissioning Q3 2026.",milestones:[{m:"Company Registration",t:"2025-Q1",a:"Feb 2025",s:"Completed"},{m:"First Order Delivery",t:"2025-Q3",a:"Sep 2025",s:"Completed"},{m:"Ground Breaking",t:"2026-Q1",a:"Jan 19 2026",s:"Completed"},{m:"Commissioning",t:"2026-Q3",a:"TBD",s:"Planned"}]},
+  {company:"AIXTRON",loc:"Kulim",sector:"Semiconductor Equipment",status:"Pre-Construction",phase:"Pre-Construction",invest:"EUR 40M (~RM 190M)",jobs:250,news:"Mar 2026: Announced EUR 40M new facility in Penang region. Capex H2 2026/H1 2027. Plant start-up Spring 2027. First shipments H2 2027.",milestones:[{m:"Announcement",t:"2026-Q1",a:"Mar 25 2026",s:"Completed"},{m:"CAPEX Phase 1",t:"2026-H2",a:"TBD",s:"Planned"},{m:"CAPEX Phase 2",t:"2027-H1",a:"TBD",s:"Planned"},{m:"Plant Start-Up",t:"2027-Spring",a:"TBD",s:"Planned"},{m:"First Shipments",t:"2027-H2",a:"TBD",s:"Planned"}]},
+  {company:"Medtronic",loc:"Kulim",sector:"Medical Devices",status:"Ramp-Up",phase:"Hiring",invest:"TBD (Expanding)",jobs:250,news:"Apr 2026: Active recruitment for Sr Mfg Ops QA Manager + 27+ roles in Kulim KHTP. New medical-device venture scale-up underway.",milestones:[{m:"PM Anwar Meeting",t:"2023-Q3",a:"Sep 2023",s:"Completed"},{m:"Sr Leadership Hiring",t:"2026-Q1",a:"Apr 2026",s:"Completed"},{m:"Site Fit-Out",t:"2026-Q3",a:"TBD",s:"Planned"},{m:"Production Ramp",t:"2027-Q2",a:"TBD",s:"Planned"}]},
+  {company:"Ferrotec",loc:"Kulim",sector:"High-Tech Components",status:"Under Construction",phase:"Construction",invest:"RM 1.0B",jobs:1000,news:"Apr 2025: Groundbreaking for RM1B Plant #2 at KHTP (20 acres, 1M sq ft, 700+ CNC machines, Industry 4.0). Completion ~2026.",milestones:[{m:"Ground Breaking",t:"2025-Q2",a:"Apr 2025",s:"Completed"},{m:"Facility Completion",t:"2026-Q2",a:"TBD",s:"Planned"},{m:"Production Ramp",t:"2026-Q3",a:"TBD",s:"Planned"}]},
+  {company:"Ichia Technologies",loc:"Kulim",sector:"PCBs & Assemblies",status:"Operational",phase:"Operations",invest:"RM 490M",jobs:600,news:"Oct 2025: Grand opening of 2nd facility (55,000+ sq m on 11 acres). AI & IoT enabled.",milestones:[{m:"Ground Breaking",t:"2023",a:"Completed",s:"Completed"},{m:"Grand Opening",t:"2025-Q4",a:"Oct 2025",s:"Completed"},{m:"Full Production",t:"2026-Q2",a:"TBD",s:"Planned"}]},
+  {company:"AT&S",loc:"Kulim",sector:"IC Substrates",status:"Operational",phase:"High-Volume Mfg",invest:"RM 5.0B",jobs:1500,news:"May 2025: High-volume manufacturing start for AMD and other customers. ~1,500 employees. Targeting top-3 global substrate provider.",milestones:[{m:"Site Establishment",t:"2022",a:"Completed",s:"Completed"},{m:"HVM Start",t:"2025-Q2",a:"May 2025",s:"Completed"},{m:"Top-3 Global",t:"2027",a:"TBD",s:"Planned"}]},
+  {company:"Hyundai Motor",loc:"Kulim",sector:"Automotive Assembly",status:"Operational",phase:"Production",invest:"RM 2.16B",jobs:800,news:"First Malaysian assembly plant in Kulim. Plans 7 CKD models within 5 years.",milestones:[{m:"Site Prep",t:"2024",a:"Completed",s:"Completed"},{m:"Plant Opening",t:"2025-Q4",a:"Late 2025",s:"Completed"},{m:"7 CKD Models",t:"2030",a:"TBD",s:"Planned"}]},
+  {company:"Unigen",loc:"Kulim",sector:"Electronics Mfg",status:"Under Construction",phase:"Construction",invest:"TBD",jobs:200,news:"Oct 2024: Broke ground on 56,000 sq ft facility at KHTP.",milestones:[{m:"Ground Breaking",t:"2024-Q4",a:"Oct 2024",s:"Completed"},{m:"Facility Completion",t:"2026-Q2",a:"TBD",s:"Planned"}]},
+  {company:"Pivotal Systems",loc:"Kulim",sector:"Gas-Flow Solutions",status:"Operational",phase:"Operations",invest:"TBD",jobs:150,news:"Opened new engineering & manufacturing facility at KHTP to support semiconductor demand.",milestones:[{m:"Facility Opening",t:"2025-Q1",a:"Early 2025",s:"Completed"},{m:"Production Ramp",t:"2025-Q3",a:"TBD",s:"Completed"}]},
+  {company:"UMediC Group Berhad",loc:"Batu Kawan",sector:"Medical Devices",status:"Operational/Expansion",phase:"New Plant Planning",invest:"RM 11.4M (land)",jobs:150,news:"Jan 2026: Secured 3.06-acre lease in BKIP for RM11.4M. Construction H2 2027, completion H1 2029. Aug 2025 existing capacity doubled (+20,000 sq ft).",milestones:[{m:"Original Site",t:"2015-2020",a:"Completed",s:"Completed"},{m:"Capacity Expansion",t:"2025-Q3",a:"Aug 2025",s:"Completed"},{m:"New Land Lease",t:"2026-Q1",a:"Jan 2026",s:"Completed"},{m:"Construction Start",t:"2027-H2",a:"TBD",s:"Planned"},{m:"New Plant Complete",t:"2029-H1",a:"TBD",s:"Planned"}]},
+  {company:"Hotayi Electronic",loc:"Batu Kawan",sector:"EMS/Electronics",status:"Under Construction",phase:"Construction",invest:"RM 500M",jobs:1000,news:"Mar 2025: RM500M Phase 3 smart factory (380,000 sq ft). 1,000 new high-skilled jobs. AI-driven analytics & IoT.",milestones:[{m:"Phase 3 Announcement",t:"2025-Q1",a:"Mar 2025",s:"Completed"},{m:"Smart Factory Complete",t:"2026-Q4",a:"TBD",s:"Planned"},{m:"Full Operations",t:"2027-Q2",a:"TBD",s:"Planned"}]},
+  {company:"Benchmark Precision",loc:"Batu Kawan",sector:"Wafer Fab Equipment",status:"Under Construction",phase:"Construction",invest:"USD 25M (~RM 110M)",jobs:500,news:"Feb 2025: Groundbreaking for PT4 at BKIP. 215,000 sq ft; completion June 2026. 500+ jobs over 5 years.",milestones:[{m:"Ground Breaking",t:"2025-Q1",a:"Feb 2025",s:"Completed"},{m:"Facility Completion",t:"2026-Q2",a:"TBD",s:"Planned"},{m:"Production Ramp",t:"2026-Q4",a:"TBD",s:"Planned"}]},
+  {company:"Chipbond Technology",loc:"Batu Kawan",sector:"OSAT/Semiconductor",status:"Operational",phase:"Production",invest:"USD 200M (~RM 800M)",jobs:600,news:"Feb 2026: Officially opened RM800M advanced OSAT at Valdor Industrial Park. 10,000 wafers/month + 100M WLCSP units/month.",milestones:[{m:"Construction",t:"2024-2025",a:"Completed",s:"Completed"},{m:"Official Opening",t:"2026-Q1",a:"Feb 2026",s:"Completed"},{m:"Full Capacity",t:"2026-Q4",a:"TBD",s:"Planned"}]},
+  {company:"AMD",loc:"Bayan Lepas",sector:"Semiconductors/IC Design",status:"Operational",phase:"Production",invest:"209,000 sq ft",jobs:1200,news:"Aug 2025: Inaugurated 209,000 sq ft engineering lab and GBS facility at GBS by the Sea, Bayan Lepas. Supports global semiconductor design and business services.",milestones:[{m:"Site Planning",t:"2024",a:"Completed",s:"Completed"},{m:"Construction",t:"2025-Q2",a:"Completed",s:"Completed"},{m:"Inauguration",t:"2025-Q3",a:"Aug 14 2025",s:"Completed"},{m:"Full Staffing",t:"2026",a:"Ongoing",s:"Planned"}]},
+  {company:"MPS (Monolithic Power)",loc:"Bayan Lepas",sector:"Semiconductors/Power",status:"Operational",phase:"Production",invest:"TBD",jobs:200,news:"Mar 2026: Opened first Malaysia engineering & test center. Serves as MPS Malaysia HQ for data centre, automotive, consumer, industrial segments.",milestones:[{m:"Site Selection",t:"2025",a:"Completed",s:"Completed"},{m:"Center Opening",t:"2026-Q1",a:"Mar 10 2026",s:"Completed"},{m:"Test Lab Qual",t:"2026-Q2",a:"TBD",s:"Planned"}]},
+  {company:"Bitdeer Technologies",loc:"Bayan Lepas",sector:"Blockchain/HPC/IC Design",status:"Operational",phase:"Production",invest:"TBD",jobs:150,news:"Oct 2025: Opened first Malaysia facility. Regional hub for supply chain management + HPC hardware/software design. 7 testing labs + 2 environmental-aging chambers.",milestones:[{m:"Labs Build",t:"2025-Q3",a:"Completed",s:"Completed"},{m:"Facility Opening",t:"2025-Q4",a:"Oct 1 2025",s:"Completed"},{m:"NPU/IC Design",t:"2026",a:"TBD",s:"Planned"}]},
+  {company:"congatec",loc:"Bayan Lepas",sector:"Embedded Computing",status:"Establishing",phase:"R&D Setup",invest:"TBD",jobs:70,news:"Jan 2026: Announced new Malaysia R&D subsidiary. Onboarded 23 engineers from Kontron Asia; scaling to ~70 employees medium-term.",milestones:[{m:"Registration",t:"2026-Q1",a:"Jan 2026",s:"Completed"},{m:"Team Scale-Up",t:"2026-Q4",a:"TBD",s:"Planned"},{m:"Full R&D Ops",t:"2027-Q2",a:"TBD",s:"Planned"}]},
+  {company:"V-Chip",loc:"Bayan Lepas",sector:"Semiconductors/IC Design",status:"Operational",phase:"Production",invest:"TBD",jobs:80,news:"Jan 2026: Established new IC design facility under Penang PSD@5KM+ initiative.",milestones:[{m:"Facility Setup",t:"2025-Q4",a:"Completed",s:"Completed"},{m:"Production Launch",t:"2026-Q1",a:"Jan 5 2026",s:"Completed"}]},
+  {company:"Hanic",loc:"Bayan Lepas",sector:"Semiconductors/Packaging",status:"Ramping Up",phase:"Engineering Ramp",invest:"TBD",jobs:60,news:"Mar 2026: Hub for SoC design, verification, physical design, DFT, and advanced 2.5D/3D packaging. Aligns with National Semiconductor Strategy (NSS).",milestones:[{m:"Team Setup",t:"2025-Q4",a:"Completed",s:"Completed"},{m:"Design Ramp",t:"2026-Q2",a:"TBD",s:"Planned"},{m:"Packaging Qual",t:"2027-Q1",a:"TBD",s:"Planned"}]},
+  {company:"Penang ATE Campus",loc:"Bayan Lepas",sector:"Industrial Park",status:"Planned",phase:"Pre-Construction",invest:"~RM 40M (land)",jobs:500,news:"Mar 2026: State allocated 10 acres at PDC Industrial Park, Bayan Lepas. Targets Q2 2026 launch for advanced packaging, ATE, IDM, EMS, MedTech cluster.",milestones:[{m:"Land Allocation",t:"2026-Q1",a:"Mar 13 2026",s:"Completed"},{m:"Campus Launch",t:"2026-Q2",a:"TBD",s:"Planned"},{m:"First Tenant",t:"2027-Q2",a:"TBD",s:"Planned"}]}
+];
+
+const NEWS=[
+  {title:"Novolyte (Kulim)",body:"Jan 19 2026: Groundbreaking for RM264M battery electrolyte plant at KHTP. Capacity ~30,000 MT. Commissioning Q3 2026."},
+  {title:"AIXTRON (Penang)",body:"Mar 25 2026: Announced EUR 40M new manufacturing facility. Capex H2 2026/H1 2027. Plant start-up Spring 2027."},
+  {title:"Medtronic (Kulim)",body:"Apr 2026: Actively recruiting Sr Mfg Ops QA Manager + 27+ roles in Kulim KHTP. New medical-device venture."},
+  {title:"AMD (Bayan Lepas)",body:"Aug 2025: Inaugurated 209,000 sq ft engineering lab & GBS facility at GBS by the Sea. 1,200+ jobs."},
+  {title:"MPS (Bayan Lepas)",body:"Mar 2026: Opened first Malaysia engineering & test center. Serves as MPS Malaysia HQ."},
+  {title:"Bitdeer (Bayan Lepas)",body:"Oct 2025: Opened first Malaysia facility. 7 testing labs + 2 environmental-aging chambers."},
+  {title:"congatec (Bayan Lepas)",body:"Jan 2026: New R&D subsidiary established. Onboarded 23 engineers from Kontron Asia; scaling to ~70."},
+  {title:"V-Chip (Bayan Lepas)",body:"Jan 2026: New IC design facility under Penang PSD@5KM+ initiative."},
+  {title:"Hanic (Bayan Lepas)",body:"Mar 2026: Hub for SoC design, verification, physical design, DFT, and advanced 2.5D/3D packaging."},
+  {title:"Penang ATE Campus (Bayan Lepas)",body:"Mar 2026: State allocated 10 acres at PDC Industrial Park. Targets Q2 2026 launch."},
+  {title:"UMediC (Batu Kawan)",body:"Jan 2026: Secured 3.06-acre lease in BKIP for RM11.4M. Construction H2 2027, completion H1 2029."},
+  {title:"Ferrotec (Kulim)",body:"Apr 2025: Groundbreaking for RM1B Plant #2 at KHTP (20 acres, 1M sq ft, 700+ CNC machines)."},
+  {title:"Chipbond (Batu Kawan)",body:"Feb 2026: Officially opened RM800M OSAT at Valdor Industrial Park. 10,000 wafers/month."},
+  {title:"Hotayi (Batu Kawan)",body:"Mar 2025: RM500M Phase 3 smart factory expansion (380,000 sq ft). 1,000 new jobs."},
+  {title:"Benchmark (Batu Kawan)",body:"Feb 2025: Groundbreaking for PT4 at BKIP. USD25M (~RM110M). Completion June 2026."}
+];
+
+const ACTIONS=[
+  "Confirm final site boundaries for Novolyte Kulim",
+  "Schedule AIXTRON pre-construction kickoff (H2 2026)",
+  "Review UMediC detailed engineering plans",
+  "Monitor Novolyte plant commissioning progress (Q3 2026)",
+  "Track Hotayi, Benchmark, Chipbond milestones for Batu Kawan",
+  "Monitor Medtronic Kulim hiring progress + site fit-out",
+  "Track AMD Bayan Lepas staffing ramp to 1,200+",
+  "Monitor Penang ATE Campus Q2 2026 launch",
+  "Engage InvestPenang on AIXTRON site handover",
+  "Conduct stakeholder risk review (R001-R006)"
+];
+
+function renderProjects(){
+  const locs=Array.from(document.getElementById('loc-filter').selectedOptions).map(o=>o.value);
+  const comps=Array.from(document.getElementById('comp-filter').selectedOptions).map(o=>o.value);
+  const filtered=PROJECTS.filter(p=>locs.includes(p.loc)&&comps.includes(p.company));
+  const c=document.getElementById('projects-container');
+  if(!filtered.length){c.innerHTML='<p style="text-align:center;color:#86868b;padding:2rem;">No projects match your filter.</p>';return;}
+  c.innerHTML=filtered.map(p=>{
+    const bc=p.loc==='Kulim'?'location-kulim':p.loc==='Bayan Lepas'?'location-bayan':'location-batu';
+    return`<div class="project-card">
+      <div class="project-header">
+        <div><div class="project-title">${p.company}</div><div style="font-size:0.82rem;color:#86868b;margin-top:0.2rem;">${p.status}</div></div>
+        <span class="location-badge ${bc}">${p.loc}</span>
+      </div>
+      <div class="project-meta">
+        <div class="meta-item"><div class="label">Sector</div><div class="value">${p.sector}</div></div>
+        <div class="meta-item"><div class="label">Phase</div><div class="value">${p.phase}</div></div>
+        <div class="meta-item"><div class="label">Investment</div><div class="value">${p.invest}</div></div>
+        <div class="meta-item"><div class="label">Est. Jobs</div><div class="value">${p.jobs}</div></div>
+      </div>
+      <div class="project-latest"><strong>News:</strong> ${p.news}</div>
+      <div style="padding:0 1.5rem 1.5rem;">
+        <div style="font-weight:600;color:#0d2b1d;margin-bottom:0.5rem;letter-spacing:-0.02em;">Milestones</div>
+        <div style="overflow-x:auto;">
+          <table class="milestone-table">
+            <thead><tr><th>Milestone</th><th>Target</th><th>Actual</th><th>Status</th></tr></thead>
+            <tbody>
+              ${p.milestones.map(m=>`<tr><td>${m.m}</td><td>${m.t}</td><td>${m.a}</td><td class="status-${m.s.toLowerCase().replace(' ','-')}">${m.s}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNews(){
+  document.getElementById('news-container').innerHTML=NEWS.map(n=>`<div class="project-latest"><b>${n.title}</b><br/>${n.body}</div>`).join('');
+}
+
+function renderActions(){
+  const saved=JSON.parse(localStorage.getItem('completedActions')||'[]');
+  document.getElementById('action-container').innerHTML=ACTIONS.map((item,i)=>`<div class="action-item ${saved.includes(i)?'completed':''}"><input type="checkbox" id="ai${i}" ${saved.includes(i)?'checked':''} onchange="toggleAction(${i})"><label for="ai${i}">${item}</label></div>`).join('');
+}
+
+function toggleAction(i){
+  const saved=JSON.parse(localStorage.getItem('completedActions')||'[]');
+  if(saved.includes(i))saved.splice(saved.indexOf(i),1);else saved.push(i);
+  localStorage.setItem('completedActions',JSON.stringify(saved));
+  renderActions();
+}
+
+document.getElementById('loc-filter').addEventListener('change',renderProjects);
+document.getElementById('comp-filter').addEventListener('change',renderProjects);
+renderProjects();
+renderNews();
+renderActions();
+</script>
+</body>
+</html>

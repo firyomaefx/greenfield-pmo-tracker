@@ -1,0 +1,65 @@
+name: Greenfield Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scrapers/**'
+      - 'database/**'
+      - '.github/workflows/scrape.yml'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cp .env.example .env 2>/dev/null || true
+          echo "SUPABASE_URL=${SUPABASE_URL}" >> .env
+          echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}" >> .env
+          python -m scrapers.run_all
+
+      - name: Snapshot database to JSON
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python -c "
+import os, sys, json
+os.environ['SUPABASE_URL'] = '${{ secrets.SUPABASE_URL }}'
+os.environ['SUPABASE_SERVICE_KEY'] = '${{ secrets.SUPABASE_SERVICE_KEY }}'
+sys.path.insert(0, '.')
+from database.supabase_client import get_all_companies, get_milestones_for_company
+companies = get_all_companies()
+print(f'Snapshot: {len(companies)} companies')
+with open('projects_data.json', 'w') as f:
+    json.dump(companies, f, indent=2, default=str)
+"
+
+      - name: Commit database snapshot
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated scrape update (${{ github.run_number }})"
+          file_pattern: 'projects_data.json'
+          commit_options: '--no-verify'
+          skip_dirty_check: false

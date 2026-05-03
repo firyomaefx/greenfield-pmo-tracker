@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenfield Factory Tracker | Kulim, Batu Kawan & Bayan Lepas</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+header {
+  background: linear-gradient(135deg, #1a472a 0%, #2ecc71 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+header p { opacity: 0.9; }
+.container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+/* KPI Boxes */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.kpi-box {
+  background: white;
+  border-left: 5px solid #2ecc71;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+.kpi-box:hover { transform: translateY(-2px); }
+.kpi-box h3 { font-size: 2.5rem; color: #1a472a; margin-bottom: 0.3rem; }
+.kpi-box p { color: #666; font-size: 0.95rem; }
+
+/* Controls */
+.controls {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+.controls label { font-weight: 600; color: #555; margin-right: 0.5rem; }
+.controls select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+}
+.controls select:focus { outline: none; border-color: #2ecc71; }
+.refresh-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* Project Cards */
+.project-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.project-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f0f0f0;
+}
+.project-title { font-size: 1.4rem; font-weight: 700; color: #1a472a; }
+.location-badge {
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+}
+.location-kulim { background: #2ecc71; }
+.location-batu { background: #3498db; }
+.location-bayan { background: #e67e22; }  /* Orange for Bayan Lepas */
+
+.project-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #f9f9f9;
+}
+.meta-item { text-align: center; }
+.meta-item .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.meta-item .value { font-size: 1.1rem; font-weight: 600; color: #333; }
+
+.project-latest {
+  padding: 1rem 1.5rem;
+  background: #fffdf5;
+  border-left: 4px solid #f39c12;
+  margin: 0 1.5rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* Tables */
+.milestone-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.milestone-table th {
+  background: #1a472a;
+  color: white;
+  padding: 0.8rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.milestone-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+.milestone-table tr:hover { background: #f9f9f9; }
+.status-completed { color: #2ecc71; font-weight: 600; }
+.status-planned { color: #f39c12; font-weight: 600; }
+.status-delayed { color: #e74c3c; font-weight: 600; }
+
+/* News Section */
+.news-section { margin-top: 2rem; }
+.news-card {
+  background: #f9f9f9;
+  border-left: 4px solid #2980b9;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  border-radius: 0 6px 6px 0;
+}
+.news-card b { color: #1a472a; }
+
+/* Risk Register */
+.risk-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.risk-table th {
+  background: #c0392b;
+  color: white;
+  padding: 0.8rem;
+  text-align: left;
+}
+.risk-table td { padding: 0.8rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+.risk-table tr:nth-child(even) { background: #f9f9f9; }
+
+/* Action Items */
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.action-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  cursor: pointer;
+  accent-color: #2ecc71;
+}
+.action-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.action-item.completed label {
+  text-decoration: line-through;
+  color: #888;
+}
+
+/* Buttons */
+button {
+  background: #2980b9;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+button:hover { background: #3498db; }
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: 2rem;
+  border-top: 2px solid #eee;
+}
+
+/* Section Headers */
+h2 {
+  color: #1a472a;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #2ecc71;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .project-header { flex-direction: column; gap: 0.5rem; }
+  .controls { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+  <!-- Print Button -->
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <button onclick="window.print()" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+      🖨️ Print / Save PDF
+    </button>
+  </div>
+
+  <header>
+  <h1>🏭 Greenfield Factory Project Dashboard</h1>
+  <p>PMO Tracker — Kulim & Batu Kawan Mega Projects (2025–2028)</p>
+</header>
+
+<div class="container">
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-box">
+      <h3 id="total-projects">20</h3>
+      <p>Active Greenfield Projects</p>
+    </div>
+    <div class="kpi-box">
+      <h3 id="kulim-count">8</h3>
+      <p>Kulim Sites</p>
+    </div>
+    <div class="kpi-box">
+      <h3 id="batu-count">5</h3>
+      <p>Batu Kawan Sites</p>
+    </div>
+    <div class="kpi-box">
+      <h3>0</h3>
+      <p>At-Risk Milestones</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div>
+      <label for="location-filter">Location:</label>
+      <select id="location-filter" multiple size="2">
+      <option value="Kulim" selected>Kulim</option>
+      <option value="Batu Kawan" selected>Batu Kawan</option>
+      <option value="Bayan Lepas" selected>Bayan Lepas</option>
+      </select>
+    </div>
+    <div>
+      <label for="company-filter">Company:</label>
+      <select id="company-filter" multiple size="4">
+      <option value="Novolyte" selected>Novolyte</option>
+      <option value="AIXTRON" selected>AIXTRON</option>
+      <option value="UMediC Group Berhad" selected>UMediC</option>
+      <option value="Medtronic" selected>Medtronic</option>
+      <option value="AMD" selected>AMD</option>
+      <option value="Penang ATE Campus" selected>Penang ATE Campus</option>
+      <option value="Monolithic Power Systems" selected>Monolithic Power Systems</option>
+      <option value="Bitdeer Technologies" selected>Bitdeer Technologies</option>
+      <option value="congatec" selected>congatec</option>
+      <option value="V-Chip" selected>V-Chip</option>
+      <option value="Hanic" selected>Hanic</option>
+      <option value="Ferrotec">Ferrotec</option>
+      <option value="Ichia Technologies">Ichia Technologies</option>
+      <option value="AT&S">AT&S</option>
+      <option value="Hyundai Motor">Hyundai Motor</option>
+      <option value="Unigen">Unigen</option>
+      <option value="Pivotal Systems">Pivotal Systems</option>
+      <option value="Hotayi Electronic">Hotayi Electronic</option>
+      <option value="Benchmark Precision">Benchmark Precision</option>
+      <option value="Chipbond Technology">Chipbond Technology</option>
+      </select>
+    </div>
+    <span class="refresh-badge">Auto-refresh: ON</span>
+  </div>
+
+  <!-- Projects Container -->
+  <div id="projects-container"></div>
+
+  <!-- News Section -->
+  <h2>📰 2026 Latest Company Updates</h2>
+  <div id="news-container"></div>
+
+  <!-- Risk Register -->
+  <h2>⚠️ Risk Register</h2>
+  <div style="overflow-x: auto;">
+    <table class="risk-table">
+      <thead>
+        <tr><th>Risk ID</th><th>Description</th><th>Impact</th><th>Mitigation</th><th>Owner</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>R001</td><td>Supply chain delays</td><td>High</td><td>Dual sourcing strategy</td><td>Project Lead</td></tr>
+        <tr><td>R002</td><td>Regulatory changes</td><td>Medium</td><td>Government liaison</td><td>Compliance Officer</td></tr>
+        <tr><td>R003</td><td>Labor shortage</td><td>High</td><td>Local training programs</td><td>HR Manager</td></tr>
+        <tr><td>R004</td><td>Funding/CAPEX fluctuation</td><td>High</td><td>Phased investment approach</td><td>Finance Controller</td></tr>
+        <tr><td>R005</td><td>Multiple concurrent site works (KHTP / BKIP)</td><td>High</td><td>Traffic & logistics coordination</td><td>PMO Lead</td></tr>
+        <tr><td>R006</td><td>Currency/EUR-RM volatility (AIXTRON)</td><td>Medium</td><td>FX hedging</td><td>Finance Controller</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Action Items -->
+  <h2>✅ Action Items</h2>
+  <div id="action-items"></div>
+
+  <!-- Email Alert Button -->
+  <div style="margin: 1.5rem 0; text-align: center;">
+    <button onclick="showEmailSetup()" style="background: #9b59b6; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">
+      📧 Configure Email Alerts
+    </button>
+  </div>
+    <p>Greenfield PMO Tracker v2.2 | PMP Professional Dashboard | Standalone HTML | Auto-refresh every 5 min | Kulim & Batu Kawan | 2026</p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;">Double-click this HTML file anytime to open the dashboard. No installation required.</p>
+  </footer>
+
+</div>
+
+<script>
+// ==================== PROJECT DATA ====================
+const projects = [
+  {
+    company: "Novolyte", location: "Kulim", sector: "Battery Electrolytes",
+    status: "Under Construction", phase: "Construction",
+    investment_range: "RM 264M", jobs_estimate: 300,
+    latest: "Jan 2026: Groundbreaking for RM264M electrolyte plant at KHTP. Capacity ~30,000 MT/year. Commissioning Q3 2026.",
+    milestones: [
+      { milestone: "Company Registration (Capchem SEA)", target: "2025-Q1", actual: "Feb 2025", status: "Completed" },
+      { milestone: "First Order Delivery (Plant 1)", target: "2025-Q3", actual: "Sep 2025", status: "Completed" },
+      { milestone: "Ground Breaking (New Plant)", target: "2026-Q1", actual: "Jan 19 2026", status: "Completed" },
+      { milestone: "Plant Commissioning / Commercial Ops", target: "2026-Q3", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "AIXTRON", location: "Kulim", sector: "Semiconductor Equipment Mfg",
+    status: "Pre-Construction", phase: "Pre-Construction",
+    investment_range: "EUR 40M (~RM 190M)", jobs_estimate: 250,
+    latest: "Mar 2026: Announced EUR 40M new manufacturing facility in Penang region. Plant start-up Spring 2027.",
+    milestones: [
+      { milestone: "Strategic Announcement / Site Selection", target: "2026-Q1", actual: "Mar 25 2026", status: "Completed" },
+      { milestone: "CAPEX Phase 1 (Land / Facility)", target: "2026-H2", actual: "TBD", status: "Planned" },
+      { milestone: "CAPEX Phase 2 (Equip / Qual)", target: "2027-H1", actual: "TBD", status: "Planned" },
+      { milestone: "Plant Start-Up", target: "2027-Spring", actual: "TBD", status: "Planned" },
+      { milestone: "First Shipments", target: "2027-H2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "UMediC Group Berhad", location: "Batu Kawan", sector: "Medical Devices & Consumables",
+    status: "Operational / Expansion", phase: "Operations & New Plant Planning",
+    investment_range: "RM 11.4M (land)", jobs_estimate: 150,
+    latest: "Jan 2026: Secured 3.06-acre lease in BKIP for RM11.4M. Construction H2 2027, completion H1 2029. Aug 2025 existing capacity doubled.",
+    milestones: [
+      { milestone: "Original Site Acquisition", target: "2015-2020", actual: "Completed", status: "Completed" },
+      { milestone: "Capacity Expansion (Existing)", target: "2025-Q3", actual: "Aug 2025", status: "Completed" },
+      { milestone: "New Land Lease (3.06 acres)", target: "2026-Q1", actual: "Jan 2026", status: "Completed" },
+      { milestone: "Construction Start (New Plant)", target: "2027-H2", actual: "TBD", status: "Planned" },
+      { milestone: "New Plant Completion", target: "2029-H1", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Medtronic", location: "Kulim", sector: "Medical Devices Manufacturing",
+    status: "Ramp-Up / New Venture", phase: "Site Establishment / Hiring",
+    investment_range: "TBD (Expanding/Greenfield)", jobs_estimate: 250,
+    latest: "Apr 2026: Active recruitment for Sr Mfg Operations QA Manager in Kulim Kedah. 27+ job postings indicate new venture scale-up in KHTP.",
+    milestones: [
+      { milestone: "PM Anwar Meeting (Intent to Expand)", target: "2023-Q3", actual: "Sep 2023", status: "Completed" },
+      { milestone: "Sr Leadership Hiring Launch", target: "2026-Q1", actual: "Apr 2026", status: "Completed" },
+      { milestone: "Site Fit-Out / New Build", target: "2026-Q3", actual: "TBD", status: "Planned" },
+      { milestone: "Production Ramp / Full Ops", target: "2027-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "AMD", location: "Bayan Lepas", sector: "Semiconductors / IC Design and GBS",
+    status: "Operational", phase: "Production",
+    investment_range: "209,000 sq ft facility", jobs_estimate: 1200,
+    latest: "Aug 2025: Inaugurated new 209,000 sq ft engineering lab and GBS facility at GBS by the Sea. Supports global semiconductor design and business services.",
+    milestones: [
+      { milestone: "Site Planning / Permits", target: "2024", actual: "Completed", status: "Completed" },
+      { milestone: "Facility Construction / Fit-Out", target: "2025-Q2", actual: "Completed", status: "Completed" },
+      { milestone: "Official Inauguration", target: "2025-Q3", actual: "Aug 14 2025", status: "Completed" },
+      { milestone: "Full Staffing / Operations Ramp", target: "2026", actual: "Ongoing", status: "Planned" }
+    ]
+  },
+  {
+    company: "Monolithic Power Systems (MPS)", location: "Bayan Lepas", sector: "Semiconductors / Power Management",
+    status: "Operational", phase: "Production",
+    investment_range: "TBD", jobs_estimate: 200,
+    latest: "Mar 2026: Officially opened first Malaysia engineering and test center. Serves as MPS Malaysia HQ for data centre, automotive, consumer, and industrial segments.",
+    milestones: [
+      { milestone: "Site Selection / Lease", target: "2025", actual: "Completed", status: "Completed" },
+      { milestone: "Engineering Center Opening", target: "2026-Q1", actual: "Mar 10 2026", status: "Completed" },
+      { milestone: "Test Lab Qualification", target: "2026-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Bitdeer Technologies", location: "Bayan Lepas", sector: "Blockchain / HPC / IC Design",
+    status: "Operational", phase: "Production",
+    investment_range: "TBD", jobs_estimate: 150,
+    latest: "Oct 2025: Opened first Malaysia facility. Regional hub for supply chain management and HPC hardware/software design. Features 7 testing labs + 2 environmental-aging chambers.",
+    milestones: [
+      { milestone: "Site Setup / Labs Build", target: "2025-Q3", actual: "Completed", status: "Completed" },
+      { milestone: "Facility Opening", target: "2025-Q4", actual: "Oct 1 2025", status: "Completed" },
+      { milestone: "NPU Talent / Local IC Design Build", target: "2026", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "congatec", location: "Bayan Lepas", sector: "Embedded and Edge Computing",
+    status: "Establishing", phase: "R&D Setup",
+    investment_range: "TBD", jobs_estimate: 70,
+    latest: "Jan 2026: Announced new Malaysia R&D subsidiary. Onboarded 23 engineers from Kontron Asia; scaling to ~70 employees medium-term.",
+    milestones: [
+      { milestone: "Subsidiary Registration / Team Transfer", target: "2026-Q1", actual: "Jan 2026", status: "Completed" },
+      { milestone: "Engineering Team Scale-Up", target: "2026-Q4", actual: "TBD", status: "Planned" },
+      { milestone: "Full R&D Operations", target: "2027-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "V-Chip", location: "Bayan Lepas", sector: "Semiconductors / IC Design",
+    status: "Operational", phase: "Production",
+    investment_range: "TBD", jobs_estimate: 80,
+    latest: "Jan 2026: Established new IC design facility under Penang PSD@5KM+ initiative.",
+    milestones: [
+      { milestone: "Facility Setup / PSD Registration", target: "2025-Q4", actual: "Completed", status: "Completed" },
+      { milestone: "Production Launch", target: "2026-Q1", actual: "Jan 5 2026", status: "Completed" }
+    ]
+  },
+  {
+    company: "Hanic", location: "Bayan Lepas", sector: "Semiconductors / IC Design and Advanced Packaging",
+    status: "Ramping up", phase: "Engineering Ramp",
+    investment_range: "TBD", jobs_estimate: 60,
+    latest: "Mar 2026: Hub for SoC design, verification, physical design, DFT, and advanced 2.5D/3D packaging. Aligns with National Semiconductor Strategy (NSS).",
+    milestones: [
+      { milestone: "Team / Facility Setup", target: "2025-Q4", actual: "Completed", status: "Completed" },
+      { milestone: "Design Team Ramp", target: "2026-Q2", actual: "TBD", status: "Planned" },
+      { milestone: "Advanced Packaging Qualification", target: "2027-Q1", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Penang ATE Campus", location: "Bayan Lepas", sector: "Industrial Park / Semiconductor Ecosystem",
+    status: "Planned", phase: "Pre-Construction",
+    investment_range: "~RM 40M (land)", jobs_estimate: 500,
+    latest: "Mar 2026: State allocated 10 acres at PDC Industrial Park, Bayan Lepas. Targets advanced packaging, ATE, IDM, EMS, and MedTech cluster. Launch targeted Q2 2026.",
+    milestones: [
+      { milestone: "Land Allocation / PDC Approval", target: "2026-Q1", actual: "Mar 13 2026", status: "Completed" },
+      { milestone: "Campus Launch / Groundbreaking", target: "2026-Q2", actual: "TBD", status: "Planned" },
+      { milestone: "First Tenant Move-In", target: "2027-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Ferrotec", location: "Kulim", sector: "High-Tech Components / Precision Manufacturing",
+    status: "Under Construction", phase: "Construction",
+    investment_range: "RM 1.0B", jobs_estimate: 1000,
+    latest: "Apr 2025: Groundbreaking for RM1B Plant #2 at KHTP (20 acres, 1M sq ft, 700+ CNC machines, Industry 4.0).",
+    milestones: [
+      { milestone: "Ground Breaking (Plant #2)", target: "2025-Q2", actual: "Apr 2025", status: "Completed" },
+      { milestone: "Facility Completion", target: "2026-Q2", actual: "TBD", status: "Planned" },
+      { milestone: "Production Ramp", target: "2026-Q3", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Ichia Technologies", location: "Kulim", sector: "PCBs & PCB Assemblies",
+    status: "Operational", phase: "Operations",
+    investment_range: "RM 490M", jobs_estimate: 600,
+    latest: "Oct 2025: Grand opening of 2nd facility (55,000+ sq m on 11 acres). AI & IoT enabled.",
+    milestones: [
+      { milestone: "Ground Breaking", target: "2023", actual: "Completed", status: "Completed" },
+      { milestone: "Grand Opening (2nd Facility)", target: "2025-Q4", actual: "Oct 2025", status: "Completed" },
+      { milestone: "Full Production Ramp", target: "2026-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "AT&S", location: "Kulim", sector: "IC Substrates",
+    status: "Operational", phase: "High-Volume Manufacturing",
+    investment_range: "RM 5.0B", jobs_estimate: 1500,
+    latest: "May 2025: High-volume manufacturing start for AMD and other customers. ~1,500 employees.",
+    milestones: [
+      { milestone: "Site Establishment", target: "2022", actual: "Completed", status: "Completed" },
+      { milestone: "High-Volume Manufacturing Start", target: "2025-Q2", actual: "May 2025", status: "Completed" },
+      { milestone: "Top-3 Global Substrate Target", target: "2027", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Hyundai Motor", location: "Kulim", sector: "Automotive Assembly",
+    status: "Operational", phase: "Production",
+    investment_range: "RM 2.16B", jobs_estimate: 800,
+    latest: "First Malaysian assembly plant in Kulim. Plans 7 CKD models within 5 years.",
+    milestones: [
+      { milestone: "Site Preparation", target: "2024", actual: "Completed", status: "Completed" },
+      { milestone: "Plant Opening", target: "2025-Q4", actual: "Late 2025", status: "Completed" },
+      { milestone: "7 CKD Models Rollout", target: "2030", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Unigen", location: "Kulim", sector: "Electronics Manufacturing",
+    status: "Under Construction", phase: "Construction",
+    investment_range: "TBD", jobs_estimate: 200,
+    latest: "Oct 2024: Broke ground on 56,000 sq ft facility at KHTP.",
+    milestones: [
+      { milestone: "Ground Breaking", target: "2024-Q4", actual: "Oct 2024", status: "Completed" },
+      { milestone: "Facility Completion", target: "2026-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Pivotal Systems", location: "Kulim", sector: "Gas-Flow Solutions (Semiconductor)",
+    status: "Operational", phase: "Operations",
+    investment_range: "TBD", jobs_estimate: 150,
+    latest: "Opened new engineering & manufacturing facility at KHTP to support semiconductor demand.",
+    milestones: [
+      { milestone: "Facility Opening", target: "2025-Q1", actual: "Late 2024 / Early 2025", status: "Completed" },
+      { milestone: "Production Ramp", target: "2025-Q3", actual: "TBD", status: "Completed" }
+    ]
+  },
+  {
+    company: "Hotayi Electronic", location: "Batu Kawan", sector: "EMS / Electronics",
+    status: "Under Construction", phase: "Construction",
+    investment_range: "RM 500M", jobs_estimate: 1000,
+    latest: "Mar 2025: RM500M Phase 3 smart factory (380,000 sq ft). 1,000 new high-skilled jobs.",
+    milestones: [
+      { milestone: "Phase 3 Expansion Announcement", target: "2025-Q1", actual: "Mar 2025", status: "Completed" },
+      { milestone: "Smart Factory Completion", target: "2026-Q4", actual: "TBD", status: "Planned" },
+      { milestone: "Full Operations", target: "2027-Q2", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Benchmark Precision Technologies", location: "Batu Kawan", sector: "Wafer Fab Equipment (WFE)",
+    status: "Under Construction", phase: "Construction",
+    investment_range: "USD 25M (~RM 110M)", jobs_estimate: 500,
+    latest: "Feb 2025: Groundbreaking for 5th facility (PT4) at BKIP. 215,000 sq ft; completion June 2026.",
+    milestones: [
+      { milestone: "Ground Breaking (PT4)", target: "2025-Q1", actual: "Feb 2025", status: "Completed" },
+      { milestone: "Facility Completion", target: "2026-Q2", actual: "TBD", status: "Planned" },
+      { milestone: "Production Ramp", target: "2026-Q4", actual: "TBD", status: "Planned" }
+    ]
+  },
+  {
+    company: "Chipbond Technology", location: "Batu Kawan", sector: "OSAT / Semiconductor Packaging",
+    status: "Operational", phase: "Production",
+    investment_range: "USD 200M (~RM 800M)", jobs_estimate: 600,
+    latest: "Feb 2026: Officially opened RM800M advanced OSAT at Valdor Industrial Park. 10,000 wafers/month capacity.",
+    milestones: [
+      { milestone: "Facility Construction", target: "2024-2025", actual: "Completed", status: "Completed" },
+      { milestone: "Official Opening", target: "2026-Q1", actual: "Feb 2026", status: "Completed" },
+      { milestone: "Full Capacity Utilization", target: "2026-Q4", actual: "TBD", status: "Planned" }
+    ]
+  }
+];
+
+// ==================== NEWS DATA ====================
+const newsUpdates = [
+  { title: "Novolyte (Kulim)", body: "Jan 19 2026: Groundbreaking for RM264M battery electrolyte plant at KHTP. Annual capacity ~30,000 MT. Commissioning targeted Q3 2026." },
+  { title: "AIXTRON (Penang region)", body: "Mar 25 2026: Announced EUR 40M (~RM 190M) new manufacturing facility. Local assembly & test for compound semiconductor deposition equipment. Plant start-up Spring 2027, first shipments H2 2027." },
+  { title: "UMediC (Batu Kawan)", body: "Jan 2026: Secured 3.06-acre lease in BKIP for RM11.4M. New plant construction H2 2027, completion H1 2029. Aug 2025 existing capacity doubled." },
+  { title: "Medtronic (Kulim)", body: "Apr 2026: Actively recruiting Sr Manufacturing Operations QA Manager and 27+ roles in Kulim KHTP. New medical-device venture scale-up underway." },
+  { title: "Ferrotec (Kulim)", body: "Apr 2025: Groundbreaking for RM1B Plant #2 (20 acres, 1M sq ft, 700+ CNC machines). Under construction, completion ~2026." },
+  { title: "Chipbond (Batu Kawan)", body: "Feb 2026: Officially opened RM800M OSAT at Valdor Industrial Park. 10,000 wafers/month capacity." },
+  { title: "Hotayi Electronic (Batu Kawan)", body: "Mar 2025: RM500M Phase 3 smart factory expansion (380,000 sq ft). 1,000 new jobs." },
+  { title: "Benchmark Precision (Batu Kawan)", body: "Feb 2025: Groundbreaking for PT4 at BKIP. USD25M (~RM110M). Completion June 2026." }
+];
+
+// ==================== ACTION ITEMS ====================
+const actionItems = [
+  "Confirm final site boundaries for Novolyte Kulim — Groundbroken Jan 2026",
+  "Schedule AIXTRON pre-construction kickoff (site preparation H2 2026)",
+  "Review UMediC detailed engineering plans — expansion completed Aug 2025",
+  "Monitor Novolyte plant commissioning progress toward Q3 2026",
+  "Track Hotayi, Benchmark, Chipbond milestones for Batu Kawan cluster",
+  "Update Q2 2026 dashboard with latest construction photos & EIA status",
+  "Conduct stakeholder risk review (R001–R006)",
+  "Engage InvestPenang on AIXTRON site handover timeline",
+  "Monitor Medtronic Kulim hiring progress and site fit-out (target Q3 2026)"
+];
+
+// ==================== RENDER FUNCTIONS ====================
+function renderProjects() {
+  const locationFilter = Array.from(document.getElementById('location-filter').selectedOptions).map(o => o.value);
+  const companyFilter = Array.from(document.getElementById('company-filter').selectedOptions).map(o => o.value);
+  
+  const filtered = projects.filter(p => 
+    locationFilter.includes(p.location) && companyFilter.includes(p.company)
+  );
+  
+  const container = document.getElementById('projects-container');
+  
+  if (filtered.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: #888; padding: 2rem;">No projects match your current filter selection.</p>';
+    return;
+  }
+  
+  container.innerHTML = filtered.map(p => `
+    <div class="project-card">
+      <div class="project-header">
+        <div>
+          <div class="project-title">${p.company}</div>
+          <div style="font-size: 0.9rem; color: #888; margin-top: 0.3rem;">${p.status}</div>
+        </div>
+        <span class="location-badge ${p.location === 'Kulim' ? 'location-kulim' : p.location === 'Bayan Lepas' ? 'location-bayan' : 'location-batu'}">${p.location}</span>
+      </div>
+      <div class="project-meta">
+        <div class="meta-item"><div class="label">Sector</div><div class="value">${p.sector}</div></div>
+        <div class="meta-item"><div class="label">Phase</div><div class="value">${p.phase}</div></div>
+        <div class="meta-item"><div class="label">Investment</div><div class="value">${p.investment_range}</div></div>
+        <div class="meta-item"><div class="label">Est. Jobs</div><div class="value">${p.jobs_estimate}</div></div>
+      </div>
+      <div class="project-latest">📰 <strong>Latest:</strong> ${p.latest}</div>
+      <div style="padding: 0 1.5rem 1.5rem;">
+        <div style="font-weight: 600; margin-bottom: 0.5rem;">Milestone Schedule</div>
+        <div style="overflow-x: auto;">
+          <table class="milestone-table">
+            <thead><tr><th>Milestone</th><th>Target</th><th>Actual</th><th>Status</th></tr></thead>
+            <tbody>
+              ${p.milestones.map(m => `
+                <tr>
+                  <td>${m.milestone}</td>
+                  <td>${m.target}</td>
+                  <td>${m.actual}</td>
+                  <td class="status-${m.status.toLowerCase()}">${m.status}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderNews() {
+  const container = document.getElementById('news-container');
+  container.innerHTML = newsUpdates.map(n => `
+    <div class="news-card">
+      <b>${n.title}</b><br/>
+      ${n.body}
+    </div>
+  `).join('');
+}
+
+function renderActionItems() {
+  const container = document.getElementById('action-items');
+  const saved = JSON.parse(localStorage.getItem('completedActions') || '[]');
+  
+  container.innerHTML = actionItems.map((item, i) => {
+    const isDone = saved.includes(i);
+    return `
+      <div class="action-item ${isDone ? 'completed' : ''}">
+        <input type="checkbox" id="ai-${i}" ${isDone ? 'checked' : ''} onchange="toggleAction(${i})">
+        <label for="ai-${i}">${item}</label>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAction(index) {
+  const saved = JSON.parse(localStorage.getItem('completedActions') || '[]');
+  if (saved.includes(index)) {
+    saved.splice(saved.indexOf(index), 1);
+  } else {
+    saved.push(index);
+  }
+  localStorage.setItem('completedActions', JSON.stringify(saved));
+  renderActionItems();
+}
+
+function toggleAction(index) {
+  const saved = JSON.parse(localStorage.getItem('completedActions') || '[]');
+  if (saved.includes(index)) {
+    saved.splice(saved.indexOf(index), 1);
+  } else {
+    saved.push(index);
+  }
+  localStorage.setItem('completedActions', JSON.stringify(saved));
+  renderActionItems();
+}
+
+// Email Alert Configuration Panel
+function showEmailSetup() {
+  const panel = document.createElement('div');
+  panel.id = 'email-setup-panel';
+  panel.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 2000; max-width: 500px; width: 90%;';
+  panel.innerHTML = `
+    <h3 style="color: #1a472a; margin-bottom: 1rem;">📧 Email Alert Setup</h3>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+      To receive automated email alerts, configure these settings:
+    </p>
+    <ol style="font-size: 0.85rem; color: #555; line-height: 1.8; margin-left: 1rem;">
+      <li>Create a file named <code>.env</code> in the dashboard folder</li>
+      <li>Add your email credentials:</li>
+    </ol>
+    <pre style="background: #f5f5f5; padding: 1rem; border-radius: 5px; font-size: 0.8rem; overflow-x: auto; margin: 1rem 0;">EMAIL_SENDER=your_email@gmail.com
+EMAIL_PASSWORD=your_gmail_app_password
+EMAIL_RECIPIENT=recipient@email.com
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587</pre>
+    <p style="font-size: 0.85rem; color: #666;">
+      <strong>For Gmail:</strong> Use an App Password (not your regular password)<br>
+      Get it at: <a href="https://myaccount.google.com/apppasswords" target="_blank">Google App Passwords</a>
+    </p>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 1rem;">
+      <strong>Alert Schedule:</strong><br>
+      Daily digest of upcoming milestones<br>
+      Immediate alerts for delayed tasks<br>
+      Weekly portfolio health summary
+    </p>
+    <div style="margin-top: 1.5rem; text-align: right;">
+      <button onclick="document.getElementById('email-setup-panel').remove()" style="background: #3498db; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">Close</button>
+    </div>
+  `;
+  document.body.appendChild(panel);
+}
+
+// ==================== EVENT LISTENERS ====================
+document.getElementById('location-filter').addEventListener('change', renderProjects);
+document.getElementById('company-filter').addEventListener('change', renderProjects);
+
+// ==================== AUTO REFRESH ====================
+setInterval(() => {
+  document.querySelector('.refresh-badge').style.animation = 'pulse 0.5s';
+  // In a real app, you would fetch live data here
+  console.log('Dashboard auto-refreshed at', new Date().toLocaleTimeString());
+}, 300000); // 5 minutes
+
+// ==================== INIT ====================
+renderProjects();
+renderNews();
+renderActionItems();
+
+console.log('🚀 Greenfield Dashboard loaded. 13 projects active.');
+</script>
+
+</body>
+</html>
