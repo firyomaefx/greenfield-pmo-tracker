@@ -267,6 +267,13 @@ def log_scrape_run(source: str, status: str, items_found: int = 0, items_new: in
     }
     client.table("scrape_logs").insert(data).execute()
 
+def get_last_successful_scrape(source: str):
+    """v1.0.5: Get timestamp of last successful scrape for a source."""
+    client = get_anon_client()
+    resp = client.table("scrape_logs").select("run_at").eq("source", source).eq("status", "success").order("run_at", desc=True).limit(1).execute()
+    rows = resp.data or []
+    return rows[0].get("run_at") if rows else None
+
 # ==================== TESTS ====================
 
 if __name__ == "__main__":

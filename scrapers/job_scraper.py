@@ -2,12 +2,13 @@
 
 Searches Kulim, Batu Kawan & Bayan Lepas via Brave Search API.
 API key stored ONLY in GitHub/Streamlit secrets — never in source code.
-Free tier: 2,000 queries/month. We use ~12/day = 360/month (safe).
+Free tier: 2,000 queries/month. v1.0.5 adds cooldown: skip if last run < 24h ago.
 """
 
 import os
 import json
 import re
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional
 import requests as req_lib
 from scrapers.base_scraper import BaseScraper
@@ -20,6 +21,7 @@ TRACKED_COMPANIES = [
 ]
 
 ZONES = ["Kulim", "Batu Kawan", "Bayan Lepas"]
+COOLDOWN_HOURS = 24  # v1.0.5: skip API call if last successful scrape was within this window
 
 CATEGORY_RULES = [
     (r"\b(operator|assembler|production|packer|general worker|production operator|machine operator|qc inspector)\b", "Operator"),
@@ -70,9 +72,30 @@ class BraveJobScraper(BaseScraper):
             print(f"[BraveJobs] API error for '{query[:60]}': {str(e)[:100]}")
             return []
 
+    def should_run(self) -> bool:
+        """v1.0.5: Check scrape_logs. Skip if last successful run was within cooldown window."""
+        try:
+            from database.supabase_client import get_last_successful_scrape
+            last_ts = get_last_successful_scrape("brave_jobs")
+            if last_ts:
+                # Parse timestamp (could be ISO string)
+                if isinstance(last_ts, str):
+                    last_ts = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+                elapsed = datetime.now(timezone.utc) - last_ts.replace(tzinfo=timezone.utc)
+                skip = elapsed < timedelta(hours=COOLDOWN_HOURS)
+                if skip:
+                    print(f"[BraveJobs] Skipping — last successful scrape was {elapsed.seconds // 60} min ago")
+                return not skip
+        except Exception:
+            pass  # Can't check logs → run anyway
+        return True
+
     def scrape(self) -> List[Dict]:
         """Search all 3 zones, match results to tracked companies.
-        Returns a flat list with company/zone/category/title/url/source/detected_by."""
+        v1.0.5: Returns empty list if should_run() is False (cooldown active)."""
+        if not self.should_run():
+            return []
+
         results = []
 
         for zone in ZONES:
