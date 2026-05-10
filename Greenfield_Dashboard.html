@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Greenfield Factory Tracker | Kulim, Batu Kawan, Bayan Lepas & Penang</title>
+<title>Greenfield Factory Tracker | Kulim, Batu Kawan & Bayan Lepas</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -219,9 +219,9 @@ header p {
   color: #ebd8c0;
 }
 
-.location-penang {
-  background: #4a1a2e;
-  color: #ebc0d8;
+.location-unverified {
+  background: #555555;
+  color: #d0d0d0;
 }
 
 .project-meta {
@@ -451,7 +451,7 @@ h2 {
 
 <header>
   <h1>Greenfield Factory Project Tracker</h1>
-  <p>PMO Portfolio Tracker — Kulim, Batu Kawan, Bayan Lepas &amp; Penang (2025–2028)</p>
+  <p>PMO Portfolio Tracker — Kulim, Batu Kawan &amp; Bayan Lepas (2025–2028)</p>
 </header>
 
 <div class="container">
@@ -470,7 +470,6 @@ h2 {
         <option value="Kulim" selected>Kulim</option>
         <option value="Batu Kawan" selected>Batu Kawan</option>
         <option value="Bayan Lepas" selected>Bayan Lepas</option>
-        <option value="Penang" selected>Penang</option>
       </select>
     </div>
     <div>
@@ -530,7 +529,7 @@ h2 {
   </div>
 
   <footer>
-    <p>Greenfield PMO Tracker v1.0.0 | Amazing Green Theme | Kulim • Batu Kawan • Bayan Lepas • Penang | 2026</p>
+    <p>Greenfield PMO Tracker v1.1.2 | DMAIC Verified | Kulim • Batu Kawan • Bayan Lepas | 2026</p>
     <p>Double-click this HTML file anytime to open. No installation required.</p>
   </footer>
 
@@ -539,7 +538,7 @@ h2 {
 <script>
 const PROJECTS=[
   {company:"Novolyte",loc:"Kulim",sector:"Battery Electrolytes",status:"Under Construction",phase:"Construction",invest:"RM 264M",jobs:300,news:"Jan 2026: Groundbreaking for RM264M electrolyte plant at KHTP. Capacity ~30,000 MT/year. Commissioning Q3 2026.",milestones:[{m:"Company Registration",t:"2025-Q1",a:"Feb 2025",s:"Completed"},{m:"First Order Delivery",t:"2025-Q3",a:"Sep 2025",s:"Completed"},{m:"Ground Breaking",t:"2026-Q1",a:"Jan 19 2026",s:"Completed"},{m:"Commissioning",t:"2026-Q3",a:"TBD",s:"Planned"}]},
-  {company:"AIXTRON",loc:"Kulim",sector:"Semiconductor Equipment",status:"Pre-Construction",phase:"Pre-Construction",invest:"EUR 40M (~RM 190M)",jobs:250,news:"Mar 2026: Announced EUR 40M new facility in Penang region. Capex H2 2026/H1 2027. Plant start-up Spring 2027. First shipments H2 2027.",milestones:[{m:"Announcement",t:"2026-Q1",a:"Mar 25 2026",s:"Completed"},{m:"CAPEX Phase 1",t:"2026-H2",a:"TBD",s:"Planned"},{m:"CAPEX Phase 2",t:"2027-H1",a:"TBD",s:"Planned"},{m:"Plant Start-Up",t:"2027-Spring",a:"TBD",s:"Planned"},{m:"First Shipments",t:"2027-H2",a:"TBD",s:"Planned"}]},
+  {company:"AIXTRON",loc:"Penang",sector:"Semiconductor Equipment",status:"Pre-Construction",phase:"Pre-Construction",invest:"EUR 40M (~RM 190M)",jobs:250,news:"Mar 2026: Announced EUR 40M new facility in Penang region. Capex H2 2026/H1 2027. Plant start-up Spring 2027. First shipments H2 2027.",milestones:[{m:"Announcement",t:"2026-Q1",a:"Mar 25 2026",s:"Completed"},{m:"CAPEX Phase 1",t:"2026-H2",a:"TBD",s:"Planned"},{m:"CAPEX Phase 2",t:"2027-H1",a:"TBD",s:"Planned"},{m:"Plant Start-Up",t:"2027-Spring",a:"TBD",s:"Planned"},{m:"First Shipments",t:"2027-H2",a:"TBD",s:"Planned"}]},
   {company:"Medtronic",loc:"Kulim",sector:"Medical Devices",status:"Ramp-Up",phase:"Hiring",invest:"TBD (Expanding)",jobs:250,news:"Apr 2026: Active recruitment for Sr Mfg Ops QA Manager + 27+ roles in Kulim KHTP. New medical-device venture scale-up underway.",milestones:[{m:"PM Anwar Meeting",t:"2023-Q3",a:"Sep 2023",s:"Completed"},{m:"Sr Leadership Hiring",t:"2026-Q1",a:"Apr 2026",s:"Completed"},{m:"Site Fit-Out",t:"2026-Q3",a:"TBD",s:"Planned"},{m:"Production Ramp",t:"2027-Q2",a:"TBD",s:"Planned"}]},
   {company:"Ferrotec",loc:"Kulim",sector:"High-Tech Components",status:"Under Construction",phase:"Construction",invest:"RM 1.0B",jobs:1000,news:"Apr 2025: Groundbreaking for RM1B Plant #2 at KHTP (20 acres, 1M sq ft, 700+ CNC machines, Industry 4.0). Completion ~2026.",milestones:[{m:"Ground Breaking",t:"2025-Q2",a:"Apr 2025",s:"Completed"},{m:"Facility Completion",t:"2026-Q2",a:"TBD",s:"Planned"},{m:"Production Ramp",t:"2026-Q3",a:"TBD",s:"Planned"}]},
   {company:"Ichia Technologies",loc:"Kulim",sector:"PCBs & Assemblies",status:"Operational",phase:"Operations",invest:"RM 490M",jobs:600,news:"Oct 2025: Grand opening of 2nd facility (55,000+ sq m on 11 acres). AI & IoT enabled.",milestones:[{m:"Ground Breaking",t:"2023",a:"Completed",s:"Completed"},{m:"Grand Opening",t:"2025-Q4",a:"Oct 2025",s:"Completed"},{m:"Full Production",t:"2026-Q2",a:"TBD",s:"Planned"}]},
@@ -598,7 +597,7 @@ function renderProjects(){
   const c=document.getElementById('projects-container');
   if(!filtered.length){c.innerHTML='<p style="text-align:center;color:#86868b;padding:2rem;">No projects match your filter.</p>';return;}
   c.innerHTML=filtered.map(p=>{
-    const bc=p.loc==='Kulim'?'location-kulim':p.loc==='Bayan Lepas'?'location-bayan':p.loc==='Penang'?'location-penang':'location-batu';
+    const bc=p.loc==='Kulim'?'location-kulim':p.loc==='Bayan Lepas'?'location-bayan':'location-batu';
     return`<div class="project-card">
       <div class="project-header">
         <div><div class="project-title">${p.company}</div><div style="font-size:0.82rem;color:#86868b;margin-top:0.2rem;">${p.status}</div></div>
