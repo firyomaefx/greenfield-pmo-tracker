@@ -7,7 +7,8 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+MYT = timezone(timedelta(hours=8))
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -285,6 +286,14 @@ button:hover, .stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown(
+    '<div style="text-align:left;padding:0.5rem 0;font-size:0.8rem;color:#6e6e73;">'
+    'Prepared by <a href="https://www.linkedin.com/in/mohamad-firdaus-daud-55200264/" target="_blank" style="color:#1a1a1a;font-weight:600;text-decoration:none;">'
+    'Mohamad Firdaus Daud</a>'
+    '</div>',
+    unsafe_allow_html=True
+)
+
 st.markdown('<div class="main-header">Greenfield Factory Dashboard</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">PMP Portfolio Tracker — Kulim • Batu Kawan • Bayan Lepas (2025–2028)</div>', unsafe_allow_html=True)
 
@@ -295,7 +304,7 @@ if "donation_code_input" not in st.session_state:
 
 with st.sidebar:
     st.title("Controls")
-    st.caption(f"Last refresh: {datetime.now().strftime('%H:%M')}")
+    st.caption(f"Last refresh: {datetime.now(MYT).strftime('%H:%M')} MYT")
 
     location_filter = st.multiselect(
         "Location",
