@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Greenfield Factory Tracker | Kulim, Batu Kawan & Bayan Lepas</title>
+<title>Greenfield Factory Tracker | Kulim, Batu Kawan, Bayan Lepas & Penang</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -217,6 +217,11 @@ header p {
 .location-bayan {
   background: #3d2a15;
   color: #ebd8c0;
+}
+
+.location-penang {
+  background: #4a1a2e;
+  color: #ebc0d8;
 }
 
 .project-meta {
@@ -446,7 +451,7 @@ h2 {
 
 <header>
   <h1>Greenfield Factory Project Tracker</h1>
-  <p>PMO Portfolio Tracker — Kulim, Batu Kawan &amp; Bayan Lepas (2025–2028)</p>
+  <p>PMO Portfolio Tracker — Kulim, Batu Kawan, Bayan Lepas &amp; Penang (2025–2028)</p>
 </header>
 
 <div class="container">
@@ -465,6 +470,7 @@ h2 {
         <option value="Kulim" selected>Kulim</option>
         <option value="Batu Kawan" selected>Batu Kawan</option>
         <option value="Bayan Lepas" selected>Bayan Lepas</option>
+        <option value="Penang" selected>Penang</option>
       </select>
     </div>
     <div>
@@ -524,7 +530,7 @@ h2 {
   </div>
 
   <footer>
-    <p>Greenfield PMO Tracker v1.0.0 | Amazing Green Theme | Kulim • Batu Kawan • Bayan Lepas | 2026</p>
+    <p>Greenfield PMO Tracker v1.0.0 | Amazing Green Theme | Kulim • Batu Kawan • Bayan Lepas • Penang | 2026</p>
     <p>Double-click this HTML file anytime to open. No installation required.</p>
   </footer>
 
@@ -592,7 +598,7 @@ function renderProjects(){
   const c=document.getElementById('projects-container');
   if(!filtered.length){c.innerHTML='<p style="text-align:center;color:#86868b;padding:2rem;">No projects match your filter.</p>';return;}
   c.innerHTML=filtered.map(p=>{
-    const bc=p.loc==='Kulim'?'location-kulim':p.loc==='Bayan Lepas'?'location-bayan':'location-batu';
+    const bc=p.loc==='Kulim'?'location-kulim':p.loc==='Bayan Lepas'?'location-bayan':p.loc==='Penang'?'location-penang':'location-batu';
     return`<div class="project-card">
       <div class="project-header">
         <div><div class="project-title">${p.company}</div><div style="font-size:0.82rem;color:#86868b;margin-top:0.2rem;">${p.status}</div></div>

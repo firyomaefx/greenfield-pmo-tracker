@@ -142,6 +142,17 @@ body {
   text-transform: uppercase;
 }
 
+.location-badge-penang {
+  background: #4a1a2e;
+  color: #f0d0e8;
+  padding: 0.25rem 1rem;
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* Cards */
 .project-card {
   background: rgba(255, 255, 255, 0.88);
@@ -275,7 +286,7 @@ button:hover, .stButton > button:hover {
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-header">Greenfield Factory Dashboard</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">PMP Portfolio Tracker — Kulim • Batu Kawan • Bayan Lepas (2025–2028)</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">PMP Portfolio Tracker — Kulim • Batu Kawan • Bayan Lepas • Penang (2025–2028)</div>', unsafe_allow_html=True)
 
 if "jobs_unlocked" not in st.session_state:
     st.session_state.jobs_unlocked = False
@@ -288,8 +299,8 @@ with st.sidebar:
 
     location_filter = st.multiselect(
         "Location",
-        options=["Kulim", "Batu Kawan", "Bayan Lepas"],
-        default=["Kulim", "Batu Kawan", "Bayan Lepas"]
+        options=["Kulim", "Batu Kawan", "Bayan Lepas", "Penang"],
+        default=["Kulim", "Batu Kawan", "Bayan Lepas", "Penang"]
     )
 
     if USE_SUPABASE:
@@ -302,6 +313,7 @@ with st.sidebar:
     kulim_companies = [c for c in all_companies if c.get("location") == "Kulim"]
     batu_companies  = [c for c in all_companies if c.get("location") == "Batu Kawan"]
     bayan_companies = [c for c in all_companies if c.get("location") == "Bayan Lepas"]
+    penang_companies = [c for c in all_companies if c.get("location") == "Penang"]
 
     company_filter = st.multiselect(
         "Company",
@@ -353,7 +365,7 @@ with col3:
     )
 with col4:
     st.markdown(
-        f'<div class="kpi-box"><h3>{len(bayan_companies)}</h3><p>Bayan Lepas Sites</p></div>',
+        f'<div class="kpi-box"><h3>{len(bayan_companies) + len(penang_companies)}</h3><p>Bayan Lepas + Penang Sites</p></div>',
         unsafe_allow_html=True,
     )
 
@@ -377,6 +389,7 @@ else:
                     "Kulim": "location-badge-kulim",
                     "Batu Kawan": "location-badge-batu",
                     "Bayan Lepas": "location-badge-bayan",
+                    "Penang": "location-badge-penang",
                 }.get(loc, "location-badge-kulim")
 
                 st.markdown(
