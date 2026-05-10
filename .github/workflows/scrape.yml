@@ -41,6 +41,26 @@ jobs:
           echo "BRAVE_API_KEY=${BRAVE_API_KEY}" >> .env
           python -m scrapers.run_all
 
+      - name: Verify data landed
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python -c "
+import os, sys
+os.environ['SUPABASE_URL'] = '${{ secrets.SUPABASE_URL }}'
+os.environ['SUPABASE_SERVICE_KEY'] = '${{ secrets.SUPABASE_SERVICE_KEY }}'
+sys.path.insert(0, '.')
+from database.supabase_client import get_all_companies, get_jobs_preview
+comps = get_all_companies()
+jobs = get_jobs_preview()
+total = sum(p['count'] for p in jobs.values())
+print(f'VERIFIED: {len(comps)} companies, {total} total jobs')
+if total > 0:
+    for name, info in sorted(jobs.items(), key=lambda x: -x[1]['count'])[:5]:
+        print(f'  {name}: {info[\"count\"]} jobs')
+"
+
       - name: Snapshot database to JSON
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
