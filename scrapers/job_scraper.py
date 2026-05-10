@@ -98,8 +98,15 @@ class BraveJobScraper(BaseScraper):
 
         results = []
 
-        for zone in ZONES:
-            query = f"jobs hiring {zone} factory Malaysia"
+        # v1.1.0: Search all 3 sub-zones + 1 Penang-wide catch-all
+        search_queries = [
+            ("hiring Kulim factory Malaysia", "Kulim"),
+            ("hiring Batu Kawan factory Malaysia", "Batu Kawan"),
+            ("hiring Bayan Lepas factory Malaysia", "Bayan Lepas"),
+            ("jobs hiring Penang factory Malaysia manufacturing", "Penang"),
+        ]
+
+        for query, zone_label in search_queries:
             items = self.search(query)
 
             for item in items:
@@ -132,7 +139,7 @@ class BraveJobScraper(BaseScraper):
                         "raw_text": full_text,
                         "detected_by": "brave_jobs",
                         "company": matched_company,
-                        "zone": zone,
+                        "zone": zone_label,
                         "category": category,
                     })
 

@@ -28,14 +28,15 @@ ALL_PROJECTS = [
     },
     {
         "name": "AIXTRON",
-        "location": "Kulim",
+        "location": "Penang",
         "sector": "Semiconductor Equipment",
         "status": "Pre-Construction",
         "phase": "Pre-Construction",
         "investment": "EUR 40M (~RM 190M)",
         "jobs_estimate": 250,
-        "latest_news": "Mar 2026: Announced EUR 40M new manufacturing facility in Penang region. Plant start-up Spring 2027.",
+        "latest_news": "Mar 2026: Announced EUR 40M new manufacturing facility in Penang region. Exact sub-zone TBD. Plant start-up Spring 2027.",
         "sort_order": 2,
+        "location_verified": False,
         "milestones": [
             {"name": "Strategic Announcement / Site Selection", "target_date": "2026-Q1", "actual_date": "Mar 25 2026", "status": "Completed"},
             {"name": "CAPEX Phase 1 (Land / Facility)", "target_date": "2026-H2", "actual_date": "TBD", "status": "Planned"},
@@ -223,9 +224,11 @@ ALL_PROJECTS = [
         ]
     },
     # ========== BAYAN LEPAS (7 projects) ==========
+    # Bayan Lepas companies: location assumed from "Penang" press releases
     {
         "name": "AMD",
         "location": "Bayan Lepas",
+        "location_verified": True,  # GBS by the Sea is confirmed Bayan Lepas
         "sector": "Semiconductors / IC Design & GBS",
         "status": "Operational",
         "phase": "Production",
@@ -243,6 +246,7 @@ ALL_PROJECTS = [
     {
         "name": "Monolithic Power Systems (MPS)",
         "location": "Bayan Lepas",
+        "location_verified": False,  # Press release only says "Penang"
         "sector": "Semiconductors / Power Management",
         "status": "Operational",
         "phase": "Production",
@@ -259,6 +263,7 @@ ALL_PROJECTS = [
     {
         "name": "Bitdeer Technologies",
         "location": "Bayan Lepas",
+        "location_verified": False,  # Press release only says "Penang"
         "sector": "Blockchain / HPC / IC Design",
         "status": "Operational",
         "phase": "Production",
@@ -275,6 +280,7 @@ ALL_PROJECTS = [
     {
         "name": "congatec",
         "location": "Bayan Lepas",
+        "location_verified": False,  # Press release only says "Penang"
         "sector": "Embedded & Edge Computing",
         "status": "Establishing",
         "phase": "R&D Setup",
@@ -291,6 +297,7 @@ ALL_PROJECTS = [
     {
         "name": "V-Chip",
         "location": "Bayan Lepas",
+        "location_verified": False,  # PSD@5KM+ covers entire Penang
         "sector": "Semiconductors / IC Design",
         "status": "Operational",
         "phase": "Production",
@@ -306,6 +313,7 @@ ALL_PROJECTS = [
     {
         "name": "Hanic",
         "location": "Bayan Lepas",
+        "location_verified": False,  # Press release only says "Penang"
         "sector": "Semiconductors / IC Design & Advanced Packaging",
         "status": "Ramping Up",
         "phase": "Engineering Ramp",

@@ -17,7 +17,8 @@ from scrapers.nlp_processor import classify_news_item
 from utils.deduplicator import deduplicate
 from database.supabase_client import (
     get_all_companies, get_company_by_name, upsert_company_by_name,
-    insert_news_item, insert_job, log_scrape_run, deactivate_old_jobs
+    insert_news_item, insert_job, log_scrape_run, deactivate_old_jobs,
+    update_company_from_scrape, get_jobs_preview
 )
 
 SCRAPERS = [
@@ -51,16 +52,19 @@ def run_all_scrapers() -> List[Dict]:
 
 
 def process_and_store(items: List[Dict]):
-    """Deduplicate, classify, and store items."""
+    """Deduplicate, classify, store items, and auto-update company records (v1.1.0 DMAIC)."""
     print(f"\n  Processing {len(items)} raw items...")
     unique = deduplicate(items)
 
     existing_companies = {c["name"].lower(): c for c in get_all_companies()}
     new_news = 0
     new_jobs = 0
+    companies_updated = 0
+    location_fixes = 0
 
     for item in unique:
         item = classify_news_item(item)
+        company_id = None
 
         # Priority 1: Brave jobs already have pre-matched company + zone
         if item.get("detected_by") == "brave_jobs" and item.get("company"):
@@ -68,7 +72,6 @@ def process_and_store(items: List[Dict]):
             if matched_name.lower() in existing_companies:
                 company_id = existing_companies[matched_name.lower()]["id"]
             else:
-                # Auto-detect new company
                 new_comp = upsert_company_by_name({
                     "name": matched_name,
                     "location": item.get("zone") or "Penang",
@@ -85,7 +88,6 @@ def process_and_store(items: List[Dict]):
                     existing_companies[matched_name.lower()] = new_comp
                     print(f"  [NEW COMPANY via Brave] {matched_name} ({item.get('zone','?')})")
         else:
-            # For other scrapers, use NLP extraction
             extracted_name = item.get("extracted_company", "")
             if extracted_name and extracted_name.lower() in existing_companies:
                 company_id = existing_companies[extracted_name.lower()]["id"]
@@ -106,49 +108,83 @@ def process_and_store(items: List[Dict]):
                     existing_companies[extracted_name.lower()] = new_comp
                     print(f"  [NEW COMPANY] {extracted_name} ({item.get('extracted_location','?')})")
 
-        if company_id:
-            detected = item.get("detected_by", "")
-            if detected in ["rss", "mida", "penang", "bursa", "company_page"]:
-                result = insert_news_item({
-                    "company_id": company_id,
-                    "title": item["title"],
-                    "body": item.get("body", ""),
-                    "source": item["source"],
-                    "source_url": item.get("source_url", ""),
-                    "published_at": item.get("published_at", ""),
-                    "detected_by": detected
-                })
-                if result:
-                    new_news += 1
-            elif detected in ["jobs", "brave_jobs"]:
-                job_zone = item.get("zone") or item.get("extracted_location", "")
-                job_category = item.get("category", "Uncategorized")
-                result = insert_job({
-                    "company_id": company_id,
-                    "title": item["title"],
-                    "job_url": item.get("source_url", ""),
-                    "source": item["source"],
-                    "location": job_zone,
-                    "category": job_category,
-                    "posted_at": item.get("published_at", datetime.now().isoformat())
-                })
-                if result:
-                    new_jobs += 1
-            else:
-                # Unknown type, store as news
-                result = insert_news_item({
-                    "company_id": company_id,
-                    "title": item["title"],
-                    "body": item.get("body", ""),
-                    "source": item["source"],
-                    "source_url": item.get("source_url", ""),
-                    "published_at": item.get("published_at", ""),
-                    "detected_by": detected
-                })
-                if result:
-                    new_news += 1
+        if not company_id:
+            continue
 
-    print(f"  New news items: {new_news}, New job listings: {new_jobs}")
+        # Store the item
+        detected = item.get("detected_by", "")
+        if detected in ["rss", "mida", "penang", "bursa", "company_page"]:
+            result = insert_news_item({
+                "company_id": company_id,
+                "title": item["title"],
+                "body": item.get("body", ""),
+                "source": item["source"],
+                "source_url": item.get("source_url", ""),
+                "published_at": item.get("published_at", ""),
+                "detected_by": detected
+            })
+            if result:
+                new_news += 1
+        elif detected in ["jobs", "brave_jobs"]:
+            job_zone = item.get("zone") or item.get("extracted_location", "")
+            job_category = item.get("category", "Uncategorized")
+            result = insert_job({
+                "company_id": company_id,
+                "title": item["title"],
+                "job_url": item.get("source_url", ""),
+                "source": item["source"],
+                "location": job_zone,
+                "category": job_category,
+                "posted_at": item.get("published_at", datetime.now().isoformat())
+            })
+            if result:
+                new_jobs += 1
+        else:
+            result = insert_news_item({
+                "company_id": company_id,
+                "title": item["title"],
+                "body": item.get("body", ""),
+                "source": item["source"],
+                "source_url": item.get("source_url", ""),
+                "published_at": item.get("published_at", ""),
+                "detected_by": detected
+            })
+            if result:
+                new_news += 1
+
+        # DMAIC auto-update: refresh company record from scraped data
+        try:
+            updated = update_company_from_scrape(company_id, item)
+            if updated:
+                companies_updated += 1
+                if item.get("extracted_location") and existing_companies.get(
+                    item.get("extracted_company", "").lower(), {}
+                ).get("location") != item.get("extracted_location"):
+                    location_fixes += 1
+        except Exception:
+            pass
+
+    # DMAIC Report
+    print(f"\n  {'='*50}")
+    print(f"  DMAIC REPORT")
+    print(f"  {'='*50}")
+    print(f"  New news items:   {new_news}")
+    print(f"  New job listings: {new_jobs}")
+    print(f"  Companies updated: {companies_updated}")
+    print(f"  Location fixes:    {location_fixes}")
+
+    all_comps = get_all_companies()
+    verified = sum(1 for c in all_comps if c.get("location_verified", True))
+    unverified = len(all_comps) - verified
+    print(f"  Location verified: {verified}/{len(all_comps)} (unverified: {unverified})")
+
+    jobs = get_jobs_preview()
+    total_jobs = sum(p["count"] for p in jobs.values())
+    print(f"  Total jobs in DB:  {total_jobs}")
+    if total_jobs > 0:
+        for name, info in sorted(jobs.items(), key=lambda x: -x[1]["count"])[:5]:
+            print(f"    {name}: {info['count']} jobs ({info['zone']})")
+    print(f"  {'='*50}")
 
 
 if __name__ == "__main__":

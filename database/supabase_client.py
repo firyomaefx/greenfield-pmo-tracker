@@ -64,6 +64,45 @@ def update_company(company_id: str, data: dict):
     resp = client.table("companies").update(data).eq("id", company_id).execute()
     return resp.data[0] if resp.data else None
 
+def update_company_from_scrape(company_id: str, extracted: dict):
+    """v1.1.0: Smart update — only overwrite with better/newer scraped data.
+    Returns True if any field was updated."""
+    existing = get_company_by_name(None)  # placeholder, need full record
+    client = get_service_client()
+    resp = client.table("companies").select("*").eq("id", company_id).execute()
+    rows = resp.data or []
+    if not rows:
+        return False
+    existing = rows[0]
+
+    updates = {}
+    scraped_loc = extracted.get("extracted_location")
+    if scraped_loc and scraped_loc in ("Kulim", "Batu Kawan", "Bayan Lepas", "Penang"):
+        if existing.get("location") != scraped_loc and not existing.get("location_verified", True):
+            updates["location"] = scraped_loc
+            updates["location_verified"] = True
+            print(f"  [LOCATION FIX] {existing.get('name')}: {existing.get('location')} -> {scraped_loc}")
+
+    scraped_invest = extracted.get("extracted_investment")
+    if scraped_invest and not existing.get("investment"):
+        updates["investment"] = scraped_invest
+
+    scraped_jobs = extracted.get("extracted_jobs")
+    if scraped_jobs and (not existing.get("jobs_estimate") or scraped_jobs > existing.get("jobs_estimate", 0)):
+        updates["jobs_estimate"] = scraped_jobs
+
+    scraped_news = extracted.get("title")
+    if scraped_news and len(scraped_news) > 10:
+        updates["latest_news"] = scraped_news[:300]
+        updates["source_url"] = extracted.get("source_url", "")
+
+    if not updates:
+        return False
+
+    client = get_service_client()
+    client.table("companies").update(updates).eq("id", company_id).execute()
+    return True
+
 def upsert_company_by_name(data: dict):
     """Insert company if not exists, update if exists (match by name)."""
     existing = get_company_by_name(data.get("name", ""))

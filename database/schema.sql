@@ -9,11 +9,11 @@ ALTER TABLE IF EXISTS jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS scrape_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS donation_codes ENABLE ROW LEVEL SECURITY;
 
--- Companies table (core entity)
+-- Location constraint updated v1.1.0: added 'Penang' for unverified sub-zone
 CREATE TABLE IF NOT EXISTS companies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  location TEXT NOT NULL CHECK (location IN ('Kulim', 'Batu Kawan', 'Bayan Lepas')),
+  location TEXT NOT NULL CHECK (location IN ('Kulim', 'Batu Kawan', 'Bayan Lepas', 'Penang')),
   sector TEXT NOT NULL,
   status TEXT NOT NULL,
   phase TEXT,
@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS companies (
   source_url TEXT,
   is_auto_detected BOOLEAN DEFAULT false,
   needs_review BOOLEAN DEFAULT false,
+  location_verified BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -151,7 +152,8 @@ CREATE TRIGGER trg_milestones_updated
   BEFORE UPDATE ON milestones
   FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
--- Add missing columns to existing jobs table (v1.0.2 fix)
+-- Add missing columns to existing tables (v1.0.7)
+ALTER TABLE public.companies ADD COLUMN IF NOT EXISTS location_verified BOOLEAN DEFAULT true;
 ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Uncategorized';
 ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS last_verified TIMESTAMPTZ DEFAULT NOW();
 
